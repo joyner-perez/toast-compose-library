@@ -1,0 +1,7 @@
+TEAM_ID=
+
+PRODUCT_NAME=ToastComposeLibrary
+PRODUCT_BUNDLE_IDENTIFIER=com.joyner.toastcomposelibrary.ToastComposeLibrary$(TEAM_ID)
+
+CURRENT_PROJECT_VERSION=1
+MARKETING_VERSION=1.0
