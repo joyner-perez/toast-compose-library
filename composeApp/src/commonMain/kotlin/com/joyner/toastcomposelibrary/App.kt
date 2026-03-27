@@ -1,51 +1,73 @@
 package com.joyner.toastcomposelibrary
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.painterResource
-
-import toastcomposelibrary.composeapp.generated.resources.Res
-import toastcomposelibrary.composeapp.generated.resources.compose_multiplatform
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import com.joyner.toastcomposelibrary.toast.ToastHost
+import com.joyner.toastcomposelibrary.toast.ToastType
+import com.joyner.toastcomposelibrary.toast.rememberToastState
 
 @Composable
-@Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
+        val toastState = rememberToastState()
+
+        ToastHost(toastState = toastState) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .safeContentPadding()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+            ) {
+                Text(
+                    text = "ToastCompose Demo",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+                Button(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
+                    onClick = { toastState.show("Operación exitosa", ToastType.SUCCESS) }
                 ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+                    Text("Mostrar SUCCESS")
+                }
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828)),
+                    onClick = { toastState.show("Ocurrió un error", ToastType.ERROR) }
+                ) {
+                    Text("Mostrar ERROR")
+                }
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1565C0)),
+                    onClick = { toastState.show("Información importante", ToastType.INFO) }
+                ) {
+                    Text("Mostrar INFO")
+                }
+
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
+                    onClick = { toastState.show("Atención requerida", ToastType.WARNING) }
+                ) {
+                    Text("Mostrar WARNING")
                 }
             }
         }
