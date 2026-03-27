@@ -20,7 +20,7 @@ import com.joyner.toastcomposelibrary.toast.ToastType
 import com.joyner.toastcomposelibrary.toast.rememberToastState
 
 @Composable
-fun App() {
+internal fun SampleApp() {
     MaterialTheme {
         val toastState = rememberToastState()
 
@@ -42,33 +42,25 @@ fun App() {
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
                     onClick = { toastState.show("Operación exitosa", ToastType.SUCCESS) }
-                ) {
-                    Text("Mostrar SUCCESS")
-                }
+                ) { Text("Mostrar SUCCESS") }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828)),
                     onClick = { toastState.show("Ocurrió un error", ToastType.ERROR) }
-                ) {
-                    Text("Mostrar ERROR")
-                }
+                ) { Text("Mostrar ERROR") }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1565C0)),
                     onClick = { toastState.show("Información importante", ToastType.INFO) }
-                ) {
-                    Text("Mostrar INFO")
-                }
+                ) { Text("Mostrar INFO") }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
                     onClick = { toastState.show("Atención requerida", ToastType.WARNING) }
-                ) {
-                    Text("Mostrar WARNING")
-                }
+                ) { Text("Mostrar WARNING") }
             }
         }
     }
