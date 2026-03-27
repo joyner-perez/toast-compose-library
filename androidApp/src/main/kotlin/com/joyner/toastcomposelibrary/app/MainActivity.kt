@@ -38,10 +38,11 @@ private fun SampleApp() {
 
         ToastHost(toastState = toastState) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .safeContentPadding()
-                    .padding(24.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .safeContentPadding()
+                        .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
             ) {

@@ -56,7 +56,7 @@ fun ToastHost(
         val toast = toastState.currentToast
 
         AnimatedVisibility(
-            visible = toast != null,
+            visible = toast.message.isNotBlank(),
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
             exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
             modifier = Modifier
@@ -64,7 +64,7 @@ fun ToastHost(
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
-            if (toast != null) {
+            if (toast.message.isNotBlank()) {
                 ToastItem(toast = toast)
             }
         }

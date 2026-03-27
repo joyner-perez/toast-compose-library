@@ -6,13 +6,21 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.vanniktechPublish)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
 }
 
 kotlin {
     android {
         namespace = "com.joyner.toastcomposelibrary"
-        compileSdk = libs.versions.android.compileSdk.get().toInt()
-        minSdk = libs.versions.android.minSdk.get().toInt()
+        compileSdk =
+            libs.versions.android.compileSdk
+                .get()
+                .toInt()
+        minSdk =
+            libs.versions.android.minSdk
+                .get()
+                .toInt()
 
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
@@ -31,26 +39,43 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.compose.runtime)
-            implementation(libs.compose.foundation)
-            implementation(libs.compose.material3)
-            implementation(libs.compose.ui)
-            implementation(libs.compose.components.resources)
-            implementation(libs.compose.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodelCompose)
-            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(dependencyNotation = libs.compose.runtime)
+            implementation(dependencyNotation = libs.compose.foundation)
+            implementation(dependencyNotation = libs.compose.material3)
+            implementation(dependencyNotation = libs.compose.ui)
+            implementation(dependencyNotation = libs.compose.components.resources)
+            implementation(dependencyNotation = libs.compose.uiToolingPreview)
+            implementation(dependencyNotation = libs.androidx.lifecycle.viewmodelCompose)
+            implementation(dependencyNotation = libs.androidx.lifecycle.runtimeCompose)
         }
         commonTest.dependencies {
-            implementation(libs.kotlin.test)
+            implementation(dependencyNotation = libs.kotlin.test)
         }
     }
 }
 
+dependencies {
+    detektPlugins(libs.detekt.formatting)
+    detektPlugins(libs.detekt.rules.compose)
+    detektPlugins(libs.detekt.rules.libraries)
+    detektPlugins(libs.detekt.rules.ruleauthors)
+}
+
+detekt {
+    config.setFrom(rootProject.files("config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    source.setFrom(
+        "src/commonMain/kotlin",
+        "src/iosMain/kotlin"
+    )
+}
+
 mavenPublishing {
     coordinates(
-        groupId    = "com.joyner",
+        groupId = "com.joyner",
         artifactId = "toastcompose",
-        version    = "1.0.0"
+        version = "1.0.0"
     )
 
     publishToMavenCentral()
