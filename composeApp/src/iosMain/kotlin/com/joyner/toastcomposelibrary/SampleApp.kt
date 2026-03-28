@@ -33,35 +33,35 @@ internal fun SampleApp() {
                     .safeContentPadding()
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
             ) {
                 Text(
                     text = "ToastCompose Demo",
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
                 )
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-                    onClick = { toastState.show("Operación exitosa", ToastType.SUCCESS) }
+                    onClick = { toastState.show("Operación exitosa", ToastType.SUCCESS) },
                 ) { Text("Mostrar SUCCESS") }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828)),
-                    onClick = { toastState.show("Ocurrió un error", ToastType.ERROR) }
+                    onClick = { toastState.show("Ocurrió un error", ToastType.ERROR) },
                 ) { Text("Mostrar ERROR") }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1565C0)),
-                    onClick = { toastState.show("Información importante", ToastType.INFO) }
+                    onClick = { toastState.show("Información importante", ToastType.INFO) },
                 ) { Text("Mostrar INFO") }
 
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
-                    onClick = { toastState.show("Atención requerida", ToastType.WARNING) }
+                    onClick = { toastState.show("Atención requerida", ToastType.WARNING) },
                 ) { Text("Mostrar WARNING") }
             }
 
@@ -70,7 +70,7 @@ internal fun SampleApp() {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .padding(horizontal = 16.dp, vertical = 24.dp),
             )
         }
     }

@@ -8,25 +8,42 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Immutable
 class ToastState {
+    private val scope = CoroutineScope(context = SupervisorJob() + Dispatchers.Main)
+
     var currentToast: ToastData by mutableStateOf(value = ToastData())
         internal set
 
     fun show(message: String, type: ToastType = ToastType.INFO, durationMillis: Long = 2500L) {
-        currentToast = ToastData(message = message, type = type, durationMillis = durationMillis)
+        if (isVisible()) {
+            scope.launch {
+                dismiss()
+                delay(timeMillis = ExitAnimationDurationMs)
+                currentToast =
+                    ToastData(message = message, type = type, durationMillis = durationMillis)
+            }
+        } else {
+            currentToast =
+                ToastData(message = message, type = type, durationMillis = durationMillis)
+        }
     }
 
     fun dismiss() {
         currentToast = currentToast.copy(message = "")
     }
 
-    fun reset() {
+    internal fun reset() {
         currentToast = ToastData()
     }
 
-    internal fun isVisible(): Boolean = currentToast.isVisible
+    internal fun isVisible(): Boolean = currentToast.message.isNotBlank()
 
     companion object {
         val Saver: Saver<ToastState, *> = listSaver(

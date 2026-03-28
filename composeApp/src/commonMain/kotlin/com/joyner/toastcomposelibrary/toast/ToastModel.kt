@@ -2,6 +2,8 @@ package com.joyner.toastcomposelibrary.toast
 
 import androidx.compose.ui.graphics.Color
 
+internal const val ExitAnimationDurationMs = 300L
+
 enum class ToastType {
     SUCCESS,
     ERROR,
@@ -13,9 +15,7 @@ data class ToastData(
     val message: String = "",
     val type: ToastType = ToastType.INFO,
     val durationMillis: Long = 2500L
-) {
-    val isVisible: Boolean get() = message.isNotBlank()
-}
+)
 
 internal val ToastType.backgroundColor: Color
     get() = when (this) {
