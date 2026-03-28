@@ -1,4 +1,5 @@
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
+import org.jlleitschuh.gradle.ktlint.tasks.BaseKtLintCheckTask
 
 plugins {
     alias(libs.plugins.androidApplication) apply false
@@ -26,6 +27,14 @@ subprojects {
         outputColorName.set("RED")
         filter {
             exclude("**/com/joyner/toastcomposelibrary/app/**")
+        }
+    }
+    afterEvaluate {
+        tasks.withType<BaseKtLintCheckTask>().configureEach {
+            val srcDir = project.file("src")
+            if (srcDir.exists()) {
+                setSource(project.fileTree(srcDir) { include("**/*.kt", "**/*.kts") })
+            }
         }
     }
 }
