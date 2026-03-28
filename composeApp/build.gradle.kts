@@ -49,6 +49,7 @@ kotlin {
             implementation(dependencyNotation = libs.compose.ui)
             implementation(dependencyNotation = libs.compose.components.resources)
             implementation(dependencyNotation = libs.compose.uiToolingPreview)
+            implementation(dependencyNotation = libs.compose.material.icons.core)
             implementation(dependencyNotation = libs.androidx.lifecycle.viewmodelCompose)
             implementation(dependencyNotation = libs.androidx.lifecycle.runtimeCompose)
         }
