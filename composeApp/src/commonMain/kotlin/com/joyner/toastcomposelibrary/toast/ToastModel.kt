@@ -14,7 +14,7 @@ data class ToastData(
     val type: ToastType = ToastType.INFO,
     val durationMillis: Long = 2500L
 ) {
-    internal fun reset() = copy(message = "", type = ToastType.INFO, durationMillis = 2500L)
+    val isVisible: Boolean get() = message.isNotBlank()
 }
 
 internal val ToastType.backgroundColor: Color

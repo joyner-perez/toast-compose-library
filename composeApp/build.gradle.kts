@@ -59,6 +59,7 @@ dependencies {
     detektPlugins(libs.detekt.rules.compose)
     detektPlugins(libs.detekt.rules.libraries)
     detektPlugins(libs.detekt.rules.ruleauthors)
+    androidRuntimeClasspath(libs.compose.uiTooling)
 }
 
 detekt {
