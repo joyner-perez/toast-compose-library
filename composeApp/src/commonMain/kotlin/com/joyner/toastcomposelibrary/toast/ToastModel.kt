@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 
 internal const val ExitAnimationDurationMs = 300L
@@ -17,11 +18,16 @@ enum class ToastType {
     WARNING
 }
 
+sealed class ToastIcon {
+    data class Vector(val imageVector: ImageVector) : ToastIcon()
+    data class Resource(val painter: Painter) : ToastIcon()
+}
+
 data class ToastData(
     val message: String = "",
     val type: ToastType = ToastType.INFO,
     val durationMillis: Long = 2500L,
-    val customIcon: ImageVector = type.icon,
+    val customIcon: ToastIcon = ToastIcon.Vector(imageVector = type.icon),
     val customBackgroundColor: Color = type.backgroundColor
 )
 

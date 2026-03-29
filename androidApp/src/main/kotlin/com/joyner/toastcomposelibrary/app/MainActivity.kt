@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -20,18 +22,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.joyner.toastcomposelibrary.toast.ToastCompose
+import com.joyner.toastcomposelibrary.toast.ToastIcon
 import com.joyner.toastcomposelibrary.toast.ToastNative
 import com.joyner.toastcomposelibrary.toast.ToastNativeDuration
-import com.joyner.toastcomposelibrary.toast.ToastCompose
 import com.joyner.toastcomposelibrary.toast.ToastState
 import com.joyner.toastcomposelibrary.toast.ToastType
 import com.joyner.toastcomposelibrary.toast.rememberToastNative
 import com.joyner.toastcomposelibrary.toast.rememberToastState
 import com.joyner.toastcomposelibrary.toast.show
+import androidx.compose.ui.res.painterResource
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,18 +115,37 @@ private fun SampleContent(toastState: ToastState, toastNative: ToastNative) {
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-        Text(text = "Custom Toast Demo", style = MaterialTheme.typography.headlineSmall)
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
-            onClick = {
-                toastState.show(
-                    message = "Toast con icono y color personalizados",
-                    icon = Icons.Filled.Star,
-                    backgroundColor = Color(0xFF6A1B9A),
-                )
-            },
-        ) { Text("Mostrar Custom") }
+        CustomToastSection(toastState = toastState)
     }
+}
+
+@Composable
+private fun CustomToastSection(toastState: ToastState) {
+    val composePainter = painterResource(R.drawable.ic_compose_multiplatform)
+
+    Text(text = "Custom Toast Demo", style = MaterialTheme.typography.headlineSmall)
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
+        onClick = {
+            toastState.show(
+                message = "Toast con icono personalizado (vector)",
+                icon = ToastIcon.Vector(Icons.Filled.Star),
+                backgroundColor = Color(0xFF6A1B9A),
+            )
+        },
+    ) { Text("Mostrar Custom Vector") }
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00695C)),
+        onClick = {
+            toastState.show(
+                message = "Toast con icono desde drawable",
+                icon = ToastIcon.Resource(composePainter),
+                backgroundColor = Color(0xFF00695C),
+            )
+        },
+    ) { Text("Mostrar Custom Drawable") }
 }

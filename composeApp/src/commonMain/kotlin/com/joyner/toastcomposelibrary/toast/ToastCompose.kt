@@ -99,11 +99,19 @@ private fun ToastItem(toast: ToastData) {
                 .background(Color.White.copy(alpha = 0.25f)),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = toast.customIcon,
-                contentDescription = null,
-                tint = Color.White
-            )
+            when (val icon = toast.customIcon) {
+                is ToastIcon.Vector -> Icon(
+                    imageVector = icon.imageVector,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+
+                is ToastIcon.Resource -> Icon(
+                    painter = icon.painter,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
         }
 
         Text(

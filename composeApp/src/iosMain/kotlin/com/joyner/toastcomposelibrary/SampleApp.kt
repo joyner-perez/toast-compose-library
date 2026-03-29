@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.joyner.toastcomposelibrary.toast.ToastCompose
+import com.joyner.toastcomposelibrary.toast.ToastIcon
 import com.joyner.toastcomposelibrary.toast.ToastNative
 import com.joyner.toastcomposelibrary.toast.ToastNativeDuration
 import com.joyner.toastcomposelibrary.toast.ToastState
@@ -28,12 +29,16 @@ import com.joyner.toastcomposelibrary.toast.ToastType
 import com.joyner.toastcomposelibrary.toast.rememberToastNative
 import com.joyner.toastcomposelibrary.toast.rememberToastState
 import com.joyner.toastcomposelibrary.toast.show
+import org.jetbrains.compose.resources.painterResource
+import toastcomposelibrary.composeapp.generated.resources.Res
+import toastcomposelibrary.composeapp.generated.resources.compose_multiplatform
 
 private val ColorSuccess = Color(0xFF2E7D32)
 private val ColorError = Color(0xFFC62828)
 private val ColorInfo = Color(0xFF1565C0)
 private val ColorWarning = Color(0xFFE65100)
 private val ColorCustom = Color(0xFF6A1B9A)
+private val ColorTeal = Color(0xFF00695C)
 
 @Composable
 internal fun SampleApp() {
@@ -107,18 +112,37 @@ private fun SampleContent(toastState: ToastState, nativeToast: ToastNative) {
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-        Text(text = "Custom Toast Demo", style = MaterialTheme.typography.headlineSmall)
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorCustom),
-            onClick = {
-                toastState.show(
-                    message = "Toast con icono y color personalizados",
-                    icon = Icons.Filled.Star,
-                    backgroundColor = ColorCustom
-                )
-            }
-        ) { Text("Mostrar Custom") }
+        CustomToastSection(toastState = toastState)
     }
+}
+
+@Composable
+private fun CustomToastSection(toastState: ToastState) {
+    val composePainter = painterResource(Res.drawable.compose_multiplatform)
+
+    Text(text = "Custom Toast Demo", style = MaterialTheme.typography.headlineSmall)
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorCustom),
+        onClick = {
+            toastState.show(
+                message = "Toast con icono personalizado (vector)",
+                icon = ToastIcon.Vector(Icons.Filled.Star),
+                backgroundColor = ColorCustom
+            )
+        }
+    ) { Text("Mostrar Custom Vector") }
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorTeal),
+        onClick = {
+            toastState.show(
+                message = "Toast con icono desde drawable",
+                icon = ToastIcon.Resource(composePainter),
+                backgroundColor = ColorTeal
+            )
+        }
+    ) { Text("Mostrar Custom Drawable") }
 }

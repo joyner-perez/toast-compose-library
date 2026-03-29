@@ -9,7 +9,6 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,7 +26,7 @@ class ToastState {
         message: String,
         type: ToastType = ToastType.INFO,
         durationMillis: Long = 2500L,
-        icon: ImageVector = type.icon,
+        icon: ToastIcon = ToastIcon.Vector(imageVector = type.icon),
         backgroundColor: Color = type.backgroundColor
     ) {
         val toast = ToastData(
