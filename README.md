@@ -1,5 +1,10 @@
 # ToastCompose
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.joyner-perez/toastcompose.svg)](https://central.sonatype.com/artifact/io.github.joyner-perez/toastcompose)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3+-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Compose Multiplatform](https://img.shields.io/badge/Compose%20Multiplatform-1.10+-4285F4?logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/compose-multiplatform)
+
 A lightweight, fully customizable toast notification library for **Compose Multiplatform** (Android & iOS).
 
 - ✅ Compose Multiplatform (Android + iOS)
