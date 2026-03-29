@@ -55,10 +55,43 @@ A lightweight, fully customizable toast notification library for **Compose Multi
 
 ## Installation
 
-### Compose Multiplatform project
+### Option A — Version catalog (`libs.versions.toml`) ✅ recommended
 
-In your `composeApp/build.gradle.kts`, add the dependency to `commonMain`:
+**Step 1.** Add the version and library entry to `gradle/libs.versions.toml`:
 
+```toml
+[versions]
+toastCompose = "0.0.1"
+
+[libraries]
+toast-compose = { module = "io.github.joyner-perez:toastcompose", version.ref = "toastCompose" }
+```
+
+**Step 2.** Add the dependency in your `build.gradle.kts`:
+
+*Compose Multiplatform project — `composeApp/build.gradle.kts`:*
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.toast.compose)
+        }
+    }
+}
+```
+
+*Android-only project — module `build.gradle.kts`:*
+```kotlin
+dependencies {
+    implementation(libs.toast.compose)
+}
+```
+
+---
+
+### Option B — String notation
+
+*Compose Multiplatform project — `composeApp/build.gradle.kts`:*
 ```kotlin
 kotlin {
     sourceSets {
@@ -69,10 +102,7 @@ kotlin {
 }
 ```
 
-### Android-only project
-
-In your module's `build.gradle.kts`:
-
+*Android-only project — module `build.gradle.kts`:*
 ```kotlin
 dependencies {
     implementation("io.github.joyner-perez:toastcompose:0.0.1")
