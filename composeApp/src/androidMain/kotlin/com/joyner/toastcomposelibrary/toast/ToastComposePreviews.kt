@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun ToastComposeSuccessPreview() {
     val state = ToastState().also {
-        it.show(message = "Operación exitosa", type = ToastType.SUCCESS)
+        it.show(message = "Operation successful", type = ToastType.SUCCESS)
     }
     Box(modifier = Modifier.padding(16.dp)) {
         ToastItem(toast = state.currentToast, onDismiss = {
@@ -22,7 +22,7 @@ fun ToastComposeSuccessPreview() {
 @Preview
 @Composable
 fun ToastComposeErrorPreview() {
-    val state = ToastState().also { it.show("Ocurrió un error", ToastType.ERROR) }
+    val state = ToastState().also { it.show("An error occurred", ToastType.ERROR) }
     Box(modifier = Modifier.padding(16.dp)) {
         ToastItem(toast = state.currentToast, onDismiss = {
         }, showProgressBar = false, progress = { 1f })
@@ -33,7 +33,7 @@ fun ToastComposeErrorPreview() {
 @Composable
 fun ToastComposeActionPreview() {
     val state = ToastState().also {
-        it.show("Elemento eliminado", ToastType.ERROR, onAction = {})
+        it.show("Item deleted", ToastType.ERROR, onAction = {})
     }
     Box(modifier = Modifier.padding(16.dp)) {
         ToastItem(toast = state.currentToast, onDismiss = {
@@ -44,7 +44,7 @@ fun ToastComposeActionPreview() {
 @Preview
 @Composable
 fun ToastComposeWarningPreview() {
-    val state = ToastState().also { it.show("Atención requerida", ToastType.WARNING) }
+    val state = ToastState().also { it.show("Attention required", ToastType.WARNING) }
     Box(modifier = Modifier.padding(16.dp)) {
         ToastItem(toast = state.currentToast, onDismiss = {
         }, showProgressBar = false, progress = { 1f })
@@ -54,7 +54,7 @@ fun ToastComposeWarningPreview() {
 @Preview
 @Composable
 fun ToastComposeProgressBarPreview() {
-    val state = ToastState().also { it.show("Con barra de progreso", ToastType.INFO) }
+    val state = ToastState().also { it.show("With progress bar", ToastType.INFO) }
     Box(modifier = Modifier.padding(16.dp)) {
         ToastItem(toast = state.currentToast, onDismiss = {
         }, showProgressBar = true, progress = { 0.6f })

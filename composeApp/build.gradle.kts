@@ -79,15 +79,12 @@ detekt {
 
 mavenPublishing {
     coordinates(
-        groupId = "com.joyner",
+        groupId = "io.github.joyner-perez",
         artifactId = "toastcompose",
         version = "1.0.0"
     )
 
     publishToMavenCentral()
-
-    // Firma requerida para publicar en Maven Central.
-    // Para publicar solo en Maven Local (pruebas) se puede omitir.
     signAllPublications()
 
     pom {

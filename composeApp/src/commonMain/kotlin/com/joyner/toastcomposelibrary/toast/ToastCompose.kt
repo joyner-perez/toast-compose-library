@@ -59,7 +59,7 @@ import toastcomposelibrary.composeapp.generated.resources.toast_undo_label
  *
  * Box(modifier = Modifier.fillMaxSize()) {
  *     MyScreenContent(
- *         onSuccess = { toastState.show("Guardado", ToastType.SUCCESS) }
+ *         onSuccess = { toastState.show("Saved", ToastType.SUCCESS) }
  *     )
  *     ToastCompose(
  *         toastState = toastState,

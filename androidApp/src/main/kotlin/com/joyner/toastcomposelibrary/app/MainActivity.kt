@@ -83,26 +83,26 @@ private fun SampleContent(
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-            onClick = { toastState.show("Operación exitosa", ToastType.SUCCESS) }
-        ) { Text("Mostrar SUCCESS") }
+            onClick = { toastState.show("Operation successful", ToastType.SUCCESS) }
+        ) { Text("Show SUCCESS") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828)),
-            onClick = { toastState.show("Ocurrió un error", ToastType.ERROR) }
-        ) { Text("Mostrar ERROR") }
+            onClick = { toastState.show("An error occurred", ToastType.ERROR) }
+        ) { Text("Show ERROR") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1565C0)),
-            onClick = { toastState.show("Información importante", ToastType.INFO) }
-        ) { Text("Mostrar INFO") }
+            onClick = { toastState.show("Important information", ToastType.INFO) }
+        ) { Text("Show INFO") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
-            onClick = { toastState.show("Atención requerida", ToastType.WARNING) }
-        ) { Text("Mostrar WARNING") }
+            onClick = { toastState.show("Attention required", ToastType.WARNING) }
+        ) { Text("Show WARNING") }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
@@ -110,13 +110,13 @@ private fun SampleContent(
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { toastNative.show("Toast nativo corto") }
-        ) { Text("Mostrar Native SHORT") }
+            onClick = { toastNative.show("Short native toast") }
+        ) { Text("Show Native SHORT") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { toastNative.show("Toast nativo largo", ToastNativeDuration.LONG) }
-        ) { Text("Mostrar Native LONG") }
+            onClick = { toastNative.show("Long native toast", ToastNativeDuration.LONG) }
+        ) { Text("Show Native LONG") }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
@@ -139,51 +139,51 @@ private fun CustomToastSection(toastState: ToastState) {
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
         onClick = {
             toastState.show(
-                message = "Toast con icono, color y fuente personalizados",
+                message = "Custom icon, color and font",
                 icon = ToastIcon.Vector(Icons.Filled.Star),
                 backgroundColor = Color(0xFF6A1B9A),
                 textColor = Color(0xFF00695C),
                 fontFamily = FontFamily.Cursive
             )
         }
-    ) { Text("Mostrar Custom Vector") }
+    ) { Text("Show Custom Vector") }
 
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00695C)),
         onClick = {
             toastState.show(
-                message = "Toast con icono desde drawable",
+                message = "Toast with drawable icon",
                 icon = ToastIcon.Resource(composePainter),
                 backgroundColor = Color(0xFF00695C)
             )
         }
-    ) { Text("Mostrar Custom Drawable") }
+    ) { Text("Show Custom Drawable") }
 
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828)),
         onClick = {
             toastState.show(
-                message = "Elemento eliminado",
+                message = "Item deleted",
                 type = ToastType.ERROR,
                 onAction = {}
             )
         }
-    ) { Text("Acción: Deshacer (default)") }
+    ) { Text("Action: Undo (default)") }
 
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1565C0)),
         onClick = {
             toastState.show(
-                message = "Archivo guardado",
+                message = "File saved",
                 type = ToastType.SUCCESS,
-                actionLabel = "Ver",
+                actionLabel = "View",
                 onAction = {}
             )
         }
-    ) { Text("Acción: Ver (custom)") }
+    ) { Text("Action: View (custom)") }
 }
 
 @Composable
@@ -193,9 +193,9 @@ private fun QueueToastSection(toastState: ToastState) {
     Button(
         modifier = Modifier.fillMaxWidth(),
         onClick = {
-            toastState.show("Primer toast en la cola", ToastType.SUCCESS)
-            toastState.show("Segundo toast en la cola", ToastType.INFO)
-            toastState.show("Tercer toast en la cola", ToastType.WARNING)
+            toastState.show("First toast in queue", ToastType.SUCCESS)
+            toastState.show("Second toast in queue", ToastType.INFO)
+            toastState.show("Third toast in queue", ToastType.WARNING)
         }
-    ) { Text("Mostrar 3 en cola") }
+    ) { Text("Show 3 in queue") }
 }
