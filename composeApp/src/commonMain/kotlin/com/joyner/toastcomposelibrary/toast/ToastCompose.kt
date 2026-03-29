@@ -119,6 +119,7 @@ private fun ToastItem(toast: ToastData) {
             color = toast.customTextColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
+            fontFamily = toast.customFontFamily,
             modifier = Modifier.weight(1f)
         )
     }
@@ -159,5 +160,3 @@ private fun ToastComposeWarningPreview() {
         ToastItem(toast = state.currentToast)
     }
 }
-
-// endregion

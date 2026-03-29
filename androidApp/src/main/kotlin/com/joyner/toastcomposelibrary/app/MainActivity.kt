@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.joyner.toastcomposelibrary.toast.ToastCompose
 import com.joyner.toastcomposelibrary.toast.ToastIcon
@@ -33,7 +35,6 @@ import com.joyner.toastcomposelibrary.toast.ToastType
 import com.joyner.toastcomposelibrary.toast.rememberToastNative
 import com.joyner.toastcomposelibrary.toast.rememberToastState
 import com.joyner.toastcomposelibrary.toast.show
-import androidx.compose.ui.res.painterResource
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,7 +58,7 @@ private fun SampleApp() {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 24.dp),
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
             )
         }
     }
@@ -71,32 +72,32 @@ private fun SampleContent(toastState: ToastState, toastNative: ToastNative) {
             .safeContentPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
     ) {
         Text(text = "ToastCompose Demo", style = MaterialTheme.typography.headlineSmall)
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32)),
-            onClick = { toastState.show("Operación exitosa", ToastType.SUCCESS) },
+            onClick = { toastState.show("Operación exitosa", ToastType.SUCCESS) }
         ) { Text("Mostrar SUCCESS") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828)),
-            onClick = { toastState.show("Ocurrió un error", ToastType.ERROR) },
+            onClick = { toastState.show("Ocurrió un error", ToastType.ERROR) }
         ) { Text("Mostrar ERROR") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1565C0)),
-            onClick = { toastState.show("Información importante", ToastType.INFO) },
+            onClick = { toastState.show("Información importante", ToastType.INFO) }
         ) { Text("Mostrar INFO") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
-            onClick = { toastState.show("Atención requerida", ToastType.WARNING) },
+            onClick = { toastState.show("Atención requerida", ToastType.WARNING) }
         ) { Text("Mostrar WARNING") }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -105,12 +106,12 @@ private fun SampleContent(toastState: ToastState, toastNative: ToastNative) {
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { toastNative.show("Toast nativo corto") },
+            onClick = { toastNative.show("Toast nativo corto") }
         ) { Text("Mostrar Native SHORT") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { toastNative.show("Toast nativo largo", ToastNativeDuration.LONG) },
+            onClick = { toastNative.show("Toast nativo largo", ToastNativeDuration.LONG) }
         ) { Text("Mostrar Native LONG") }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
@@ -130,13 +131,14 @@ private fun CustomToastSection(toastState: ToastState) {
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
         onClick = {
             toastState.show(
-                message = "Toast con icono y texto personalizados",
+                message = "Toast con icono, color y fuente personalizados",
                 icon = ToastIcon.Vector(Icons.Filled.Star),
                 backgroundColor = Color(0xFF6A1B9A),
                 textColor = Color(0xFF00695C),
+                fontFamily = FontFamily.Cursive
             )
-        },
-    ) { Text("Mostrar Custom Vector") }
+        }
+    ) { Text("Mostrar Custom Vector and font") }
 
     Button(
         modifier = Modifier.fillMaxWidth(),
@@ -145,8 +147,8 @@ private fun CustomToastSection(toastState: ToastState) {
             toastState.show(
                 message = "Toast con icono desde drawable",
                 icon = ToastIcon.Resource(composePainter),
-                backgroundColor = Color(0xFF00695C),
+                backgroundColor = Color(0xFF00695C)
             )
-        },
+        }
     ) { Text("Mostrar Custom Drawable") }
 }

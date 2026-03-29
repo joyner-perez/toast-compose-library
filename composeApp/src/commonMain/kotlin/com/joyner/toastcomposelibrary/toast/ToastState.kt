@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -28,7 +29,8 @@ class ToastState {
         durationMillis: Long = 2500L,
         icon: ToastIcon = ToastIcon.Vector(imageVector = type.icon),
         backgroundColor: Color = type.backgroundColor,
-        textColor: Color = Color.White
+        textColor: Color = Color.White,
+        fontFamily: FontFamily = FontFamily.Default
     ) {
         val toast = ToastData(
             message = message,
@@ -36,7 +38,8 @@ class ToastState {
             durationMillis = durationMillis,
             customIcon = icon,
             customBackgroundColor = backgroundColor,
-            customTextColor = textColor
+            customTextColor = textColor,
+            customFontFamily = fontFamily
         )
         if (isVisible()) {
             scope.launch {

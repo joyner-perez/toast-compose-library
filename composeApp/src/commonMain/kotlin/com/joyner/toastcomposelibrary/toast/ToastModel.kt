@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 
 internal const val ExitAnimationDurationMs = 300L
 
@@ -29,7 +30,8 @@ data class ToastData(
     val durationMillis: Long = 2500L,
     val customIcon: ToastIcon = ToastIcon.Vector(imageVector = type.icon),
     val customBackgroundColor: Color = type.backgroundColor,
-    val customTextColor: Color = Color.White
+    val customTextColor: Color = Color.White,
+    val customFontFamily: FontFamily = FontFamily.Default
 )
 
 internal val ToastType.backgroundColor: Color

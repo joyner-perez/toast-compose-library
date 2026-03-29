@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.joyner.toastcomposelibrary.toast.ToastCompose
 import com.joyner.toastcomposelibrary.toast.ToastIcon
@@ -127,10 +128,11 @@ private fun CustomToastSection(toastState: ToastState) {
         colors = ButtonDefaults.buttonColors(containerColor = ColorCustom),
         onClick = {
             toastState.show(
-                message = "Toast con icono y texto personalizados",
+                message = "Toast con icono, color y fuente personalizados",
                 icon = ToastIcon.Vector(Icons.Filled.Star),
                 backgroundColor = ColorCustom,
-                textColor = ColorTeal
+                textColor = ColorTeal,
+                fontFamily = FontFamily.Cursive
             )
         }
     ) { Text("Mostrar Custom Vector") }
