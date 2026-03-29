@@ -1,17 +1,23 @@
 package com.joyner.toastcomposelibrary.toast
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
 
 internal const val ExitAnimationDurationMs = 300L
+internal val DefaultIconSize: Dp = 28.dp
 
 enum class ToastType {
     SUCCESS,
@@ -33,7 +39,13 @@ data class ToastData(
     val customBackgroundColor: Color = type.backgroundColor,
     val customTextColor: Color = Color.White,
     val customFontFamily: FontFamily = FontFamily.Default,
-    val customFontSize: TextUnit = TextUnit.Unspecified
+    val customFontSize: TextUnit = TextUnit.Unspecified,
+    val customIconTint: Color = Color.White,
+    val customFontWeight: FontWeight = FontWeight.Medium,
+    val customShape: Shape = RoundedCornerShape(size = 12.dp),
+    val customIconSize: Dp = DefaultIconSize,
+    val actionLabel: String = "",
+    val onAction: (() -> Unit)? = null
 )
 
 internal val ToastType.backgroundColor: Color

@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,22 +28,23 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
+import toastcomposelibrary.composeapp.generated.resources.Res
+import toastcomposelibrary.composeapp.generated.resources.toast_undo_label
 
 /**
  * Standalone toast composable managed by [toastState].
  *
- * Place it anywhere in your layout — typically at the bottom of a [Box] or inside a [Scaffold].
- * Visibility is handled internally: the toast appears when [ToastState.show] is called and
- * auto-dismisses after [ToastData.durationMillis].
+ * Visibility is handled internally: the toast appears when [ToastState.show] is called,
+ * auto-dismisses after [ToastData.durationMillis], and can also be dismissed by tapping it.
  *
- * Example usage:
+ * **Option 1 — without Scaffold**, place it inside a [Box] and align it manually:
  * ```kotlin
  * val toastState = rememberToastState()
  *
- * Box(Modifier.fillMaxSize()) {
+ * Box(modifier = Modifier.fillMaxSize()) {
  *     MyScreenContent(
- *         onSuccess = { toastState.show("Guardado", ToastType.SUCCESS) },
- *         onError   = { toastState.show("Error", ToastType.ERROR) }
+ *         onSuccess = { toastState.show("Guardado", ToastType.SUCCESS) }
  *     )
  *     ToastCompose(
  *         toastState = toastState,
@@ -55,8 +56,17 @@ import kotlinx.coroutines.delay
  * }
  * ```
  *
+ * **Option 2 — with Scaffold**, use [ToastHost] in the `snackbarHost` slot:
+ * ```kotlin
+ * Scaffold(
+ *     snackbarHost = { ToastHost(toastState = toastState) }
+ * ) { innerPadding ->
+ *     MyScreenContent(modifier = Modifier.padding(innerPadding))
+ * }
+ * ```
+ *
  * @param toastState State that controls what message is shown and when to dismiss.
- * Use [rememberToastState] to create and [rememberSaveable] an instance.
+ * Use [rememberToastState] to create and remember an instance.
  * @param modifier Optional [Modifier] to control size and position of the toast.
  */
 @Composable
@@ -69,75 +79,93 @@ fun ToastCompose(toastState: ToastState, modifier: Modifier = Modifier) {
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
         modifier = modifier
     ) {
-        ToastItem(toast = toast)
+        ToastItem(toast = toast, onDismiss = toastState::dismiss)
     }
 
-    LaunchedEffect(toastState.isVisible()) {
-        if (toastState.isVisible()) {
+    LaunchedEffect(toast.message) {
+        if (toast.message.isNotBlank()) {
             delay(timeMillis = toast.durationMillis)
             toastState.dismiss()
-            delay(timeMillis = ExitAnimationDurationMs)
-            toastState.reset()
         }
     }
 }
 
 @Composable
-private fun ToastItem(toast: ToastData) {
+private fun ToastItemIcon(toast: ToastData) {
+    Box(
+        modifier = Modifier
+            .size(toast.customIconSize)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.25f)),
+        contentAlignment = Alignment.Center
+    ) {
+        when (val icon = toast.customIcon) {
+            is ToastIcon.Vector -> Icon(
+                imageVector = icon.imageVector,
+                contentDescription = null,
+                tint = toast.customIconTint
+            )
+
+            is ToastIcon.Resource -> Icon(
+                painter = icon.painter,
+                contentDescription = null,
+                tint = toast.customIconTint
+            )
+        }
+    }
+}
+
+@Composable
+private fun ToastItem(toast: ToastData, onDismiss: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(shape = RoundedCornerShape(size = 12.dp))
+            .clip(shape = toast.customShape)
             .background(toast.customBackgroundColor)
+            .clickable(onClick = onDismiss)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.25f)),
-            contentAlignment = Alignment.Center
-        ) {
-            when (val icon = toast.customIcon) {
-                is ToastIcon.Vector -> Icon(
-                    imageVector = icon.imageVector,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-
-                is ToastIcon.Resource -> Icon(
-                    painter = icon.painter,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
-        }
+        ToastItemIcon(toast = toast)
 
         Text(
             text = toast.message,
             color = toast.customTextColor,
-            fontSize = if (toast.customFontSize ==
-                TextUnit.Unspecified
-            ) {
+            fontSize = if (toast.customFontSize == TextUnit.Unspecified) {
                 15.sp
             } else {
                 toast.customFontSize
             },
-            fontWeight = FontWeight.Medium,
+            fontWeight = toast.customFontWeight,
             fontFamily = toast.customFontFamily,
             modifier = Modifier.weight(1f)
         )
+
+        if (toast.onAction != null) {
+            Text(
+                text = toast.actionLabel.ifBlank { stringResource(Res.string.toast_undo_label) },
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .clickable {
+                        toast.onAction.invoke()
+                        onDismiss()
+                    }
+            )
+        }
     }
 }
 
 @Preview
 @Composable
 private fun ToastComposeSuccessPreview() {
-    val state = ToastState().also { it.show("Operación exitosa", ToastType.SUCCESS) }
+    val state = ToastState().also {
+        it.show(message = "Operación exitosa", type = ToastType.SUCCESS)
+    }
     Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast)
+        ToastItem(toast = state.currentToast, onDismiss = {})
     }
 }
 
@@ -146,16 +174,18 @@ private fun ToastComposeSuccessPreview() {
 private fun ToastComposeErrorPreview() {
     val state = ToastState().also { it.show("Ocurrió un error", ToastType.ERROR) }
     Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast)
+        ToastItem(toast = state.currentToast, onDismiss = {})
     }
 }
 
 @Preview
 @Composable
-private fun ToastComposeInfoPreview() {
-    val state = ToastState().also { it.show("Información importante", ToastType.INFO) }
+private fun ToastComposeActionPreview() {
+    val state = ToastState().also {
+        it.show("Elemento eliminado", ToastType.ERROR, onAction = {})
+    }
     Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast)
+        ToastItem(toast = state.currentToast, onDismiss = {})
     }
 }
 
@@ -164,6 +194,6 @@ private fun ToastComposeInfoPreview() {
 private fun ToastComposeWarningPreview() {
     val state = ToastState().also { it.show("Atención requerida", ToastType.WARNING) }
     Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast)
+        ToastItem(toast = state.currentToast, onDismiss = {})
     }
 }

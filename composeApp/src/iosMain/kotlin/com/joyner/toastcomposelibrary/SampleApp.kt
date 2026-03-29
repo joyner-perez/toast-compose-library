@@ -1,19 +1,20 @@
 package com.joyner.toastcomposelibrary
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.joyner.toastcomposelibrary.toast.ToastCompose
+import com.joyner.toastcomposelibrary.toast.ToastHost
 import com.joyner.toastcomposelibrary.toast.ToastIcon
 import com.joyner.toastcomposelibrary.toast.ToastNative
 import com.joyner.toastcomposelibrary.toast.ToastNativeDuration
@@ -47,29 +48,32 @@ internal fun SampleApp() {
         val toastState = rememberToastState()
         val nativeToast = rememberToastNative()
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            SampleContent(toastState = toastState, nativeToast = nativeToast)
-
-            ToastCompose(
+        Scaffold(
+            snackbarHost = { ToastHost(toastState = toastState) }
+        ) { innerPadding ->
+            SampleContent(
                 toastState = toastState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                nativeToast = nativeToast,
+                modifier = Modifier.padding(innerPadding)
             )
         }
     }
 }
 
 @Composable
-private fun SampleContent(toastState: ToastState, nativeToast: ToastNative) {
+private fun SampleContent(
+    toastState: ToastState,
+    nativeToast: ToastNative,
+    modifier: Modifier = Modifier
+) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .safeContentPadding()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(text = "ToastCompose Demo", style = MaterialTheme.typography.headlineSmall)
 
@@ -114,6 +118,10 @@ private fun SampleContent(toastState: ToastState, nativeToast: ToastNative) {
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
         CustomToastSection(toastState = toastState)
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+        QueueToastSection(toastState = toastState)
     }
 }
 
@@ -148,4 +156,43 @@ private fun CustomToastSection(toastState: ToastState) {
             )
         }
     ) { Text("Mostrar Custom Drawable") }
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorError),
+        onClick = {
+            toastState.show(
+                message = "Elemento eliminado",
+                type = ToastType.ERROR,
+                onAction = {}
+            )
+        }
+    ) { Text("Acción: Deshacer (default)") }
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorInfo),
+        onClick = {
+            toastState.show(
+                message = "Archivo guardado",
+                type = ToastType.SUCCESS,
+                actionLabel = "Ver",
+                onAction = {}
+            )
+        }
+    ) { Text("Acción: Ver (custom)") }
+}
+
+@Composable
+private fun QueueToastSection(toastState: ToastState) {
+    Text(text = "Queue Demo", style = MaterialTheme.typography.headlineSmall)
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = {
+            toastState.show("Primer toast en la cola", ToastType.SUCCESS)
+            toastState.show("Segundo toast en la cola", ToastType.INFO)
+            toastState.show("Tercer toast en la cola", ToastType.WARNING)
+        }
+    ) { Text("Mostrar 3 en cola") }
 }
