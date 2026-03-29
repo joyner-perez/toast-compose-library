@@ -81,7 +81,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.joyner-perez",
         artifactId = "toastcompose",
-        version = "1.0.0"
+        version = "0.0.1"
     )
 
     publishToMavenCentral()
@@ -90,24 +90,28 @@ mavenPublishing {
     pom {
         name.set("ToastCompose")
         description.set("Toast notification library for Compose Multiplatform (Android & iOS)")
-        url.set("https://github.com/joyner/ToastComposeLibrary")
-
+        url.set("https://github.com/joyner-perez/toast-compose-library")
+        inceptionYear.set("2026")
         licenses {
             license {
-                name.set("Apache-2.0")
-                url.set("https://opensource.org/licenses/Apache-2.0")
+                name.set("MIT")
+                url.set("https://mit-license.org")
+                distribution.set("https://mit-license.org")
             }
         }
         developers {
             developer {
-                id.set("joyner")
+                id.set("Joyner")
                 name.set("Joyner")
+                url.set("https://github.com/joyner-perez")
             }
         }
         scm {
-            url.set("https://github.com/joyner/ToastComposeLibrary")
-            connection.set("scm:git:git://github.com/joyner/ToastComposeLibrary.git")
-            developerConnection.set("scm:git:ssh://git@github.com/joyner/ToastComposeLibrary.git")
+            url.set("https://github.com/joyner-perez/toast-compose-library")
+            connection.set("scm:git:git://github.com/joyner-perez/toast-compose-library.git")
+            developerConnection.set(
+                "scm:git:ssh://git@github.com/joyner-perez/toast-compose-library.git"
+            )
         }
     }
 }
