@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -117,7 +118,13 @@ private fun ToastItem(toast: ToastData) {
         Text(
             text = toast.message,
             color = toast.customTextColor,
-            fontSize = 15.sp,
+            fontSize = if (toast.customFontSize ==
+                TextUnit.Unspecified
+            ) {
+                15.sp
+            } else {
+                toast.customFontSize
+            },
             fontWeight = FontWeight.Medium,
             fontFamily = toast.customFontFamily,
             modifier = Modifier.weight(1f)
