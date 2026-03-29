@@ -2,7 +2,7 @@ package com.joyner.toastcomposelibrary.toast
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
@@ -22,14 +22,51 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@Immutable
-class ToastState {
+/**
+ * State holder that controls toast visibility and queuing.
+ *
+ * Create an instance with [rememberToastState] and pass it to [ToastCompose] or [ToastHost].
+ * Call [show] to enqueue a toast; it appears immediately if none is visible, or is held in
+ * a bounded queue (up to [maxQueueSize]) otherwise.
+ *
+ * @param maxQueueSize Maximum number of pending toasts that may be queued while one is visible.
+ * Additional toasts beyond this limit are silently dropped. Defaults to [DEFAULT_MAX_QUEUE_SIZE].
+ */
+@Stable
+class ToastState(val maxQueueSize: Int = DEFAULT_MAX_QUEUE_SIZE) {
     private val scope = CoroutineScope(context = SupervisorJob() + Dispatchers.Main)
     private val queue = ArrayDeque<ToastData>()
 
+    /**
+     * The toast currently being displayed, or an empty [ToastData] when nothing is shown.
+     * Observe this in your UI via [ToastCompose] or [ToastHost].
+     */
     var currentToast: ToastData by mutableStateOf(value = ToastData())
         internal set
 
+    /**
+     * Shows a toast with the given [message].
+     *
+     * If a toast is already visible the new one is appended to the queue (up to [maxQueueSize]).
+     * Once the visible toast is dismissed the next queued item is shown automatically.
+     *
+     * @param message Text to display inside the toast.
+     * @param type Semantic type that controls the default icon and background color.
+     * @param durationMillis How long (ms) the toast stays visible before auto-dismissing.
+     * @param icon Icon shown on the leading side. Defaults to the vector icon for [type].
+     * @param backgroundColor Fill color of the toast surface. Defaults to [type]'s color.
+     * @param textColor Color of the message text.
+     * @param fontFamily Typeface used for the message text.
+     * @param fontSize Size of the message text. Pass [TextUnit.Unspecified] to use the default.
+     * @param iconTint Tint applied to the icon.
+     * @param fontWeight Weight of the message text.
+     * @param shape Shape of the toast container.
+     * @param iconSize Size of the icon container.
+     * @param actionLabel Label for the optional action button. Falls back to the locale-aware
+     * "Undo" string when blank and [onAction] is non-null.
+     * @param onAction Optional callback invoked when the user taps the action button.
+     * When `null` no action button is shown.
+     */
     fun show(
         message: String,
         type: ToastType = ToastType.INFO,
@@ -63,12 +100,21 @@ class ToastState {
             onAction = onAction
         )
         if (isVisible()) {
-            queue.addLast(toast)
+            if (queue.size < maxQueueSize) {
+                queue.addLast(toast)
+            }
         } else {
             currentToast = toast
         }
     }
 
+    /**
+     * Dismisses the currently visible toast.
+     *
+     * The message is cleared immediately (triggering the exit animation), and the next queued
+     * toast — if any — is shown after the animation completes.
+     * Does nothing when no toast is visible.
+     */
     fun dismiss() {
         if (!isVisible()) return
         currentToast = currentToast.copy(message = "")
@@ -78,6 +124,17 @@ class ToastState {
         }
     }
 
+    /**
+     * Dismisses the current toast and clears all pending toasts in the queue.
+     *
+     * Useful when navigating away from a screen and stale toasts should not appear on the
+     * destination screen.
+     */
+    fun dismissAll() {
+        queue.clear()
+        dismiss()
+    }
+
     internal fun reset() {
         currentToast = if (queue.isNotEmpty()) queue.removeFirst() else ToastData()
     }
@@ -85,6 +142,9 @@ class ToastState {
     internal fun isVisible(): Boolean = currentToast.message.isNotBlank()
 
     companion object {
+        /** Default maximum number of toasts that can be queued while one is visible. */
+        internal const val DEFAULT_MAX_QUEUE_SIZE: Int = 3
+
         private const val INDEX_MESSAGE = 0
         private const val INDEX_TYPE = 1
         private const val INDEX_DURATION = 2
@@ -119,5 +179,13 @@ class ToastState {
     }
 }
 
+/**
+ * Creates and remembers a [ToastState] that survives recompositions and configuration changes.
+ *
+ * @param maxQueueSize Maximum number of toasts that can be queued. See [ToastState.maxQueueSize].
+ */
 @Composable
-fun rememberToastState(): ToastState = rememberSaveable(saver = ToastState.Saver) { ToastState() }
+fun rememberToastState(maxQueueSize: Int = ToastState.DEFAULT_MAX_QUEUE_SIZE): ToastState =
+    rememberSaveable(saver = ToastState.Saver) {
+        ToastState(maxQueueSize = maxQueueSize)
+    }

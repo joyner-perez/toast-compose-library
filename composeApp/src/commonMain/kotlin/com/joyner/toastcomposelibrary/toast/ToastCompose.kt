@@ -1,6 +1,11 @@
 package com.joyner.toastcomposelibrary.toast
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -9,25 +14,34 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import toastcomposelibrary.composeapp.generated.resources.Res
 import toastcomposelibrary.composeapp.generated.resources.toast_undo_label
@@ -36,7 +50,8 @@ import toastcomposelibrary.composeapp.generated.resources.toast_undo_label
  * Standalone toast composable managed by [toastState].
  *
  * Visibility is handled internally: the toast appears when [ToastState.show] is called,
- * auto-dismisses after [ToastData.durationMillis], and can also be dismissed by tapping it.
+ * auto-dismisses after [ToastData.durationMillis], and can also be dismissed by tapping it
+ * or swiping it horizontally.
  *
  * **Option 1 — without Scaffold**, place it inside a [Box] and align it manually:
  * ```kotlin
@@ -68,22 +83,68 @@ import toastcomposelibrary.composeapp.generated.resources.toast_undo_label
  * @param toastState State that controls what message is shown and when to dismiss.
  * Use [rememberToastState] to create and remember an instance.
  * @param modifier Optional [Modifier] to control size and position of the toast.
+ * @param showProgressBar When `true`, a thin progress bar is shown at the bottom of the toast
+ * indicating the remaining display time.
+ * @param enter Transition used when the toast becomes visible. Defaults to slide-up + fade-in.
+ * @param exit Transition used when the toast is dismissed. Defaults to slide-down + fade-out.
  */
 @Composable
-fun ToastCompose(toastState: ToastState, modifier: Modifier = Modifier) {
+fun ToastCompose(
+    toastState: ToastState,
+    modifier: Modifier = Modifier,
+    showProgressBar: Boolean = false,
+    enter: EnterTransition = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+    exit: ExitTransition = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+) {
     val toast = toastState.currentToast
+    val progress = remember { Animatable(initialValue = 1f) }
 
     AnimatedVisibility(
         visible = toastState.isVisible(),
-        enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-        exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+        enter = enter,
+        exit = exit,
         modifier = modifier
     ) {
-        ToastItem(toast = toast, onDismiss = toastState::dismiss)
+        key(toast.message) {
+            val dismissState = rememberSwipeToDismissBoxState()
+            LaunchedEffect(dismissState.currentValue) {
+                if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+                    toastState.dismiss()
+                }
+            }
+            SwipeToDismissBox(
+                state = dismissState,
+                backgroundContent = {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(toast.customShape)
+                            .background(toast.customBackgroundColor)
+                    )
+                }
+            ) {
+                ToastItem(
+                    toast = toast,
+                    onDismiss = toastState::dismiss,
+                    showProgressBar = showProgressBar,
+                    progress = { progress.value }
+                )
+            }
+        }
     }
 
     LaunchedEffect(toast.message) {
         if (toast.message.isNotBlank()) {
+            progress.snapTo(targetValue = 1f)
+            launch {
+                progress.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = toast.durationMillis.toInt(),
+                        easing = LinearEasing
+                    )
+                )
+            }
             delay(timeMillis = toast.durationMillis)
             toastState.dismiss()
         }
@@ -91,7 +152,7 @@ fun ToastCompose(toastState: ToastState, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ToastItemIcon(toast: ToastData) {
+internal fun ToastItemIcon(toast: ToastData) {
     Box(
         modifier = Modifier
             .size(toast.customIconSize)
@@ -116,84 +177,65 @@ private fun ToastItemIcon(toast: ToastData) {
 }
 
 @Composable
-private fun ToastItem(toast: ToastData, onDismiss: () -> Unit) {
-    Row(
+internal fun ToastItem(
+    toast: ToastData,
+    onDismiss: () -> Unit,
+    showProgressBar: Boolean,
+    progress: () -> Float
+) {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape = toast.customShape)
             .background(toast.customBackgroundColor)
             .clickable(onClick = onDismiss)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ToastItemIcon(toast = toast)
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ToastItemIcon(toast = toast)
 
-        Text(
-            text = toast.message,
-            color = toast.customTextColor,
-            fontSize = if (toast.customFontSize == TextUnit.Unspecified) {
-                15.sp
-            } else {
-                toast.customFontSize
-            },
-            fontWeight = toast.customFontWeight,
-            fontFamily = toast.customFontFamily,
-            modifier = Modifier.weight(1f)
-        )
-
-        if (toast.onAction != null) {
             Text(
-                text = toast.actionLabel.ifBlank { stringResource(Res.string.toast_undo_label) },
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
+                text = toast.message,
+                color = toast.customTextColor,
+                fontSize = if (toast.customFontSize == TextUnit.Unspecified) {
+                    15.sp
+                } else {
+                    toast.customFontSize
+                },
+                fontWeight = toast.customFontWeight,
+                fontFamily = toast.customFontFamily,
+                modifier = Modifier.weight(1f)
+            )
+
+            if (toast.onAction != null) {
+                Text(
+                    text = toast.actionLabel.ifBlank {
+                        stringResource(Res.string.toast_undo_label)
+                    },
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .clickable {
+                            toast.onAction.invoke()
+                            onDismiss()
+                        }
+                )
+            }
+        }
+
+        if (showProgressBar) {
+            LinearProgressIndicator(
+                progress = progress,
                 modifier = Modifier
-                    .padding(start = 4.dp)
-                    .clickable {
-                        toast.onAction.invoke()
-                        onDismiss()
-                    }
+                    .fillMaxWidth()
+                    .height(3.dp),
+                color = Color.White.copy(alpha = 0.7f),
+                trackColor = Color.White.copy(alpha = 0.2f)
             )
         }
-    }
-}
-
-@Preview
-@Composable
-private fun ToastComposeSuccessPreview() {
-    val state = ToastState().also {
-        it.show(message = "Operación exitosa", type = ToastType.SUCCESS)
-    }
-    Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast, onDismiss = {})
-    }
-}
-
-@Preview
-@Composable
-private fun ToastComposeErrorPreview() {
-    val state = ToastState().also { it.show("Ocurrió un error", ToastType.ERROR) }
-    Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast, onDismiss = {})
-    }
-}
-
-@Preview
-@Composable
-private fun ToastComposeActionPreview() {
-    val state = ToastState().also {
-        it.show("Elemento eliminado", ToastType.ERROR, onAction = {})
-    }
-    Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast, onDismiss = {})
-    }
-}
-
-@Preview
-@Composable
-private fun ToastComposeWarningPreview() {
-    val state = ToastState().also { it.show("Atención requerida", ToastType.WARNING) }
-    Box(modifier = Modifier.padding(16.dp)) {
-        ToastItem(toast = state.currentToast, onDismiss = {})
     }
 }

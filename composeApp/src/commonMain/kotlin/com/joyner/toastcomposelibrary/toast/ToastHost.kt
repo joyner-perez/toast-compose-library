@@ -1,5 +1,11 @@
 package com.joyner.toastcomposelibrary.toast
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -22,13 +28,25 @@ import androidx.compose.ui.unit.dp
  *
  * @param toastState State shared with the rest of your UI to trigger toasts.
  * @param modifier Optional [Modifier] forwarded to [ToastCompose].
+ * @param showProgressBar When `true`, a thin progress bar is shown indicating remaining time.
+ * @param enter Transition used when the toast becomes visible.
+ * @param exit Transition used when the toast is dismissed.
  */
 @Composable
-fun ToastHost(toastState: ToastState, modifier: Modifier = Modifier) {
+fun ToastHost(
+    toastState: ToastState,
+    modifier: Modifier = Modifier,
+    showProgressBar: Boolean = false,
+    enter: EnterTransition = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+    exit: ExitTransition = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+) {
     ToastCompose(
         toastState = toastState,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 24.dp)
+            .padding(horizontal = 16.dp, vertical = 24.dp),
+        showProgressBar = showProgressBar,
+        enter = enter,
+        exit = exit
     )
 }

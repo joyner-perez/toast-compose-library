@@ -31,6 +31,28 @@ sealed class ToastIcon {
     data class Resource(val painter: Painter) : ToastIcon()
 }
 
+/**
+ * Immutable snapshot of all properties needed to render a single toast notification.
+ *
+ * You typically don't construct this directly — use [ToastState.show] instead, which builds it
+ * from individual parameters with sensible defaults.
+ *
+ * @property message Text displayed inside the toast.
+ * @property type Semantic type that controls the default icon and background color.
+ * @property durationMillis How long (ms) the toast stays visible before auto-dismissing.
+ * @property customIcon Icon shown on the leading side of the toast.
+ * @property customBackgroundColor Fill color of the toast surface.
+ * @property customTextColor Color of the [message] text.
+ * @property customFontFamily Typeface used for the [message] text.
+ * @property customFontSize Size of the [message] text; [TextUnit.Unspecified] uses the default.
+ * @property customIconTint Tint applied to [customIcon].
+ * @property customFontWeight Weight of the [message] text.
+ * @property customShape Shape of the toast container.
+ * @property customIconSize Size of the icon container.
+ * @property actionLabel Label for the optional action button. Falls back to the locale-aware
+ * "Undo" string when blank and [onAction] is non-null.
+ * @property onAction Callback invoked when the user taps the action button. `null` hides the button.
+ */
 data class ToastData(
     val message: String = "",
     val type: ToastType = ToastType.INFO,

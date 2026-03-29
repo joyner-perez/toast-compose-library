@@ -1,11 +1,11 @@
 package com.joyner.toastcomposelibrary.toast
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 
 enum class ToastNativeDuration { SHORT, LONG }
 
-@Immutable
+@Stable
 expect class ToastNative {
     fun show(message: String, duration: ToastNativeDuration)
 }
