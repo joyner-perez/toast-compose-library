@@ -116,7 +116,7 @@ private fun ToastItem(toast: ToastData) {
 
         Text(
             text = toast.message,
-            color = Color.White,
+            color = toast.customTextColor,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)

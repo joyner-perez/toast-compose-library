@@ -28,7 +28,8 @@ data class ToastData(
     val type: ToastType = ToastType.INFO,
     val durationMillis: Long = 2500L,
     val customIcon: ToastIcon = ToastIcon.Vector(imageVector = type.icon),
-    val customBackgroundColor: Color = type.backgroundColor
+    val customBackgroundColor: Color = type.backgroundColor,
+    val customTextColor: Color = Color.White
 )
 
 internal val ToastType.backgroundColor: Color

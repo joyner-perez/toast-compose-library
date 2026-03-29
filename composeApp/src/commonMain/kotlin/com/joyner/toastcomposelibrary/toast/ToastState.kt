@@ -27,14 +27,16 @@ class ToastState {
         type: ToastType = ToastType.INFO,
         durationMillis: Long = 2500L,
         icon: ToastIcon = ToastIcon.Vector(imageVector = type.icon),
-        backgroundColor: Color = type.backgroundColor
+        backgroundColor: Color = type.backgroundColor,
+        textColor: Color = Color.White
     ) {
         val toast = ToastData(
             message = message,
             type = type,
             durationMillis = durationMillis,
             customIcon = icon,
-            customBackgroundColor = backgroundColor
+            customBackgroundColor = backgroundColor,
+            customTextColor = textColor
         )
         if (isVisible()) {
             scope.launch {

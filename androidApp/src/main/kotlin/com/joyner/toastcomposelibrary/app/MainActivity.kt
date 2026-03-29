@@ -130,9 +130,10 @@ private fun CustomToastSection(toastState: ToastState) {
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
         onClick = {
             toastState.show(
-                message = "Toast con icono personalizado (vector)",
+                message = "Toast con icono y texto personalizados",
                 icon = ToastIcon.Vector(Icons.Filled.Star),
                 backgroundColor = Color(0xFF6A1B9A),
+                textColor = Color(0xFF00695C),
             )
         },
     ) { Text("Mostrar Custom Vector") }
