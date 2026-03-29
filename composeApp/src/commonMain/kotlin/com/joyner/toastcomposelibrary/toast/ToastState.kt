@@ -8,6 +8,8 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -21,17 +23,28 @@ class ToastState {
     var currentToast: ToastData by mutableStateOf(value = ToastData())
         internal set
 
-    fun show(message: String, type: ToastType = ToastType.INFO, durationMillis: Long = 2500L) {
+    fun show(
+        message: String,
+        type: ToastType = ToastType.INFO,
+        durationMillis: Long = 2500L,
+        icon: ImageVector = type.icon,
+        backgroundColor: Color = type.backgroundColor
+    ) {
+        val toast = ToastData(
+            message = message,
+            type = type,
+            durationMillis = durationMillis,
+            customIcon = icon,
+            customBackgroundColor = backgroundColor
+        )
         if (isVisible()) {
             scope.launch {
                 dismiss()
                 delay(timeMillis = ExitAnimationDurationMs)
-                currentToast =
-                    ToastData(message = message, type = type, durationMillis = durationMillis)
+                currentToast = toast
             }
         } else {
-            currentToast =
-                ToastData(message = message, type = type, durationMillis = durationMillis)
+            currentToast = toast
         }
     }
 
@@ -46,19 +59,32 @@ class ToastState {
     internal fun isVisible(): Boolean = currentToast.message.isNotBlank()
 
     companion object {
+        private const val INDEX_MESSAGE = 0
+        private const val INDEX_TYPE = 1
+        private const val INDEX_DURATION = 2
+        private const val INDEX_BACKGROUND_COLOR = 3
+
         val Saver: Saver<ToastState, *> = listSaver(
             save = { state ->
                 val toast = state.currentToast
-                listOf(toast.message, toast.type.name, toast.durationMillis)
+                listOf(
+                    toast.message,
+                    toast.type.name,
+                    toast.durationMillis,
+                    toast.customBackgroundColor.value.toLong()
+                )
             },
             restore = { list ->
                 ToastState().also { state ->
-                    val message = list[0] as String
+                    val message = list[INDEX_MESSAGE] as String
                     if (message.isNotBlank()) {
+                        val savedColor =
+                            Color(value = (list[INDEX_BACKGROUND_COLOR] as Long).toULong())
                         state.show(
                             message = message,
-                            type = ToastType.valueOf(list[1] as String),
-                            durationMillis = list[2] as Long
+                            type = ToastType.valueOf(list[INDEX_TYPE] as String),
+                            durationMillis = list[INDEX_DURATION] as Long,
+                            backgroundColor = savedColor
                         )
                     }
                 }

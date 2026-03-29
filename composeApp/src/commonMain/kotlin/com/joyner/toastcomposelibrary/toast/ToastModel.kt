@@ -20,7 +20,9 @@ enum class ToastType {
 data class ToastData(
     val message: String = "",
     val type: ToastType = ToastType.INFO,
-    val durationMillis: Long = 2500L
+    val durationMillis: Long = 2500L,
+    val customIcon: ImageVector = type.icon,
+    val customBackgroundColor: Color = type.backgroundColor
 )
 
 internal val ToastType.backgroundColor: Color

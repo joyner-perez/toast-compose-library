@@ -20,6 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.joyner.toastcomposelibrary.toast.ToastNative
@@ -46,7 +48,7 @@ private fun SampleApp() {
         val nativeToast = rememberToastNative()
 
         Box(modifier = Modifier.fillMaxSize()) {
-            SampleContent(toastState = toastState, nativeToast = nativeToast)
+            SampleContent(toastState = toastState, toastNative = nativeToast)
 
             ToastCompose(
                 toastState = toastState,
@@ -60,7 +62,7 @@ private fun SampleApp() {
 }
 
 @Composable
-private fun SampleContent(toastState: ToastState, nativeToast: ToastNative) {
+private fun SampleContent(toastState: ToastState, toastNative: ToastNative) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,12 +103,28 @@ private fun SampleContent(toastState: ToastState, nativeToast: ToastNative) {
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { nativeToast.show("Toast nativo corto") },
+            onClick = { toastNative.show("Toast nativo corto") },
         ) { Text("Mostrar Native SHORT") }
 
         Button(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { nativeToast.show("Toast nativo largo", ToastNativeDuration.LONG) },
+            onClick = { toastNative.show("Toast nativo largo", ToastNativeDuration.LONG) },
         ) { Text("Mostrar Native LONG") }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+        Text(text = "Custom Toast Demo", style = MaterialTheme.typography.headlineSmall)
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A1B9A)),
+            onClick = {
+                toastState.show(
+                    message = "Toast con icono y color personalizados",
+                    icon = Icons.Filled.Star,
+                    backgroundColor = Color(0xFF6A1B9A),
+                )
+            },
+        ) { Text("Mostrar Custom") }
     }
 }

@@ -3,10 +3,12 @@ package com.joyner.toastcomposelibrary.toast
 import android.content.Context
 import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 
+@Immutable
 actual class ToastNative(private val context: Context) {
     actual fun show(message: String, duration: ToastNativeDuration) {
         val length = if (duration == ToastNativeDuration.LONG) {

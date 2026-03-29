@@ -1,6 +1,7 @@
 package com.joyner.toastcomposelibrary.toast
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.useContents
@@ -24,6 +25,7 @@ private const val ToastCornerRadius = 8.0
 private const val ToastFontSize = 14.0
 private const val ToastBottomOffset = 80.0
 
+@Immutable
 actual class ToastNative {
     @OptIn(ExperimentalForeignApi::class)
     actual fun show(message: String, duration: ToastNativeDuration) {

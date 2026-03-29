@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -31,6 +33,7 @@ private val ColorSuccess = Color(0xFF2E7D32)
 private val ColorError = Color(0xFFC62828)
 private val ColorInfo = Color(0xFF1565C0)
 private val ColorWarning = Color(0xFFE65100)
+private val ColorCustom = Color(0xFF6A1B9A)
 
 @Composable
 internal fun SampleApp() {
@@ -101,5 +104,21 @@ private fun SampleContent(toastState: ToastState, nativeToast: ToastNative) {
             modifier = Modifier.fillMaxWidth(),
             onClick = { nativeToast.show("Toast nativo largo", ToastNativeDuration.LONG) }
         ) { Text("Mostrar Native LONG") }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+        Text(text = "Custom Toast Demo", style = MaterialTheme.typography.headlineSmall)
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = ColorCustom),
+            onClick = {
+                toastState.show(
+                    message = "Toast con icono y color personalizados",
+                    icon = Icons.Filled.Star,
+                    backgroundColor = ColorCustom
+                )
+            }
+        ) { Text("Mostrar Custom") }
     }
 }

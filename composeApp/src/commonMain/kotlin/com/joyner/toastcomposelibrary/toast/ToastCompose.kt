@@ -87,7 +87,7 @@ private fun ToastItem(toast: ToastData) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape = RoundedCornerShape(size = 12.dp))
-            .background(toast.type.backgroundColor)
+            .background(toast.customBackgroundColor)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -100,7 +100,7 @@ private fun ToastItem(toast: ToastData) {
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = toast.type.icon,
+                imageVector = toast.customIcon,
                 contentDescription = null,
                 tint = Color.White
             )
