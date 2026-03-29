@@ -152,8 +152,8 @@ class ToastStateTest {
 
     @Test
     fun maxQueueSize_defaultIsThree() {
-        assertEquals(ToastState.DefaultMaxQueueSize, ToastState().maxQueueSize)
-        assertEquals(3, ToastState.DefaultMaxQueueSize)
+        assertEquals(ToastState.DEFAULT_MAX_QUEUE_SIZE, ToastState().maxQueueSize)
+        assertEquals(3, ToastState.DEFAULT_MAX_QUEUE_SIZE)
     }
 
     @Test

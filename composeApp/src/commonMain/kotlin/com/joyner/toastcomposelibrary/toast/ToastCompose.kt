@@ -30,8 +30,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +49,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import toastcomposelibrary.composeapp.generated.resources.Res
 import toastcomposelibrary.composeapp.generated.resources.toast_undo_label
+import kotlin.time.Clock
 
 /**
  * Standalone toast composable managed by [toastState].
@@ -97,8 +102,72 @@ fun ToastCompose(
     exit: ExitTransition = slideOutVertically(targetOffsetY = { it }) + fadeOut()
 ) {
     val toast = toastState.currentToast
-    val progress = remember { Animatable(initialValue = 1f) }
 
+    // Epoch ms when the current toast started; 0 means not yet started.
+    // Survives configuration changes (rotation) so the progress bar can resume.
+    var toastStartTime by rememberSaveable { mutableLongStateOf(value = 0L) }
+
+    // Initialize Animatable from the remaining fraction when resuming after rotation.
+    val progress = remember(toast.message) {
+        val elapsed = if (toastStartTime > 0L && toast.message.isNotBlank()) {
+            Clock.System.now().toEpochMilliseconds() - toastStartTime
+        } else {
+            0L
+        }
+        val initialFraction = if (toast.durationMillis > 0L) {
+            1f - (elapsed.toFloat() / toast.durationMillis.toFloat()).coerceIn(0f, 1f)
+        } else {
+            1f
+        }
+        Animatable(initialValue = initialFraction)
+    }
+
+    ToastAnimatedContent(
+        toast = toast,
+        toastState = toastState,
+        modifier = modifier,
+        showProgressBar = showProgressBar,
+        enter = enter,
+        exit = exit,
+        progress = { progress.value }
+    )
+
+    LaunchedEffect(toast.message) {
+        if (toast.message.isNotBlank()) {
+            val now = Clock.System.now().toEpochMilliseconds()
+            // Only record start time the first time (not when resuming after rotation)
+            if (toastStartTime == 0L) {
+                toastStartTime = now
+                progress.snapTo(targetValue = 1f)
+            }
+            val remainingMs = (toast.durationMillis - (now - toastStartTime)).coerceAtLeast(0L)
+            launch {
+                progress.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = remainingMs.toInt(),
+                        easing = LinearEasing
+                    )
+                )
+            }
+            delay(timeMillis = remainingMs)
+            toastState.dismiss()
+        } else {
+            toastStartTime = 0L // reset for the next toast
+        }
+    }
+}
+
+@Composable
+private fun ToastAnimatedContent(
+    toast: ToastData,
+    toastState: ToastState,
+    modifier: Modifier,
+    showProgressBar: Boolean,
+    enter: EnterTransition,
+    exit: ExitTransition,
+    progress: () -> Float
+) {
     AnimatedVisibility(
         visible = toastState.isVisible(),
         enter = enter,
@@ -127,26 +196,9 @@ fun ToastCompose(
                     toast = toast,
                     onDismiss = toastState::dismiss,
                     showProgressBar = showProgressBar,
-                    progress = { progress.value }
+                    progress = progress
                 )
             }
-        }
-    }
-
-    LaunchedEffect(toast.message) {
-        if (toast.message.isNotBlank()) {
-            progress.snapTo(targetValue = 1f)
-            launch {
-                progress.animateTo(
-                    targetValue = 0f,
-                    animationSpec = tween(
-                        durationMillis = toast.durationMillis.toInt(),
-                        easing = LinearEasing
-                    )
-                )
-            }
-            delay(timeMillis = toast.durationMillis)
-            toastState.dismiss()
         }
     }
 }

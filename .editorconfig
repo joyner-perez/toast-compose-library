@@ -2,3 +2,5 @@
 ktlint_code_style = android_studio
 ktlint_function_naming_ignore_when_annotated_with = Composable
 ktlint_standard_property-naming = disabled
+# kotlin.* imports must come last, matching detekt ImportOrdering and Android Studio defaults
+ij_kotlin_imports_layout = *,java.**,javax.**,kotlin.**
