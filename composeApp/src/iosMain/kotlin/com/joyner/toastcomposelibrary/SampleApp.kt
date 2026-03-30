@@ -164,7 +164,10 @@ private fun CustomToastSection(toastState: ToastState) {
             toastState.show(
                 message = "Item deleted",
                 type = ToastType.ERROR,
-                onAction = {}
+                onAction = {},
+                onDismiss = {
+                    println("ToastCompose: Toast dismissed: item deleted")
+                }
             )
         }
     ) { Text("Action: Undo (default)") }

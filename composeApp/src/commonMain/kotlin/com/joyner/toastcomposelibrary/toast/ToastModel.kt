@@ -52,6 +52,9 @@ sealed class ToastIcon {
  * @property actionLabel Label for the optional action button. Falls back to the locale-aware
  * "Undo" string when blank and [onAction] is non-null.
  * @property onAction Callback invoked when the user taps the action button. `null` hides the button.
+ * @property onDismiss Callback invoked once the toast has fully disappeared (after the exit
+ * animation completes). Use it to trigger follow-up logic that should run only after the toast
+ * is no longer visible. `null` means no callback.
  */
 data class ToastData(
     val message: String = "",
@@ -67,7 +70,8 @@ data class ToastData(
     val customShape: Shape = RoundedCornerShape(size = 12.dp),
     val customIconSize: Dp = DefaultIconSize,
     val actionLabel: String = "",
-    val onAction: (() -> Unit)? = null
+    val onAction: (() -> Unit)? = null,
+    val onDismiss: (() -> Unit)? = null
 )
 
 internal val ToastType.backgroundColor: Color

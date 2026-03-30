@@ -1,6 +1,7 @@
 package com.joyner.toastcomposelibrary.app
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -167,7 +169,10 @@ private fun CustomToastSection(toastState: ToastState) {
             toastState.show(
                 message = "Item deleted",
                 type = ToastType.ERROR,
-                onAction = {}
+                onAction = {},
+                onDismiss = {
+                    Log.d("ToastCompose", "Toast dismissed: item deleted")
+                }
             )
         }
     ) { Text("Action: Undo (default)") }

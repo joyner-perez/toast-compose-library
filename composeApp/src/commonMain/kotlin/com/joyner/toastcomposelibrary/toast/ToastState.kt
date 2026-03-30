@@ -66,6 +66,9 @@ class ToastState(val maxQueueSize: Int = DEFAULT_MAX_QUEUE_SIZE) {
      * "Undo" string when blank and [onAction] is non-null.
      * @param onAction Optional callback invoked when the user taps the action button.
      * When `null` no action button is shown.
+     * @param onDismiss Optional callback invoked once the toast has fully disappeared (after the
+     * exit animation completes). Useful for triggering follow-up logic that should run only after
+     * the toast is no longer visible. When `null` no callback is fired.
      */
     fun show(
         message: String,
@@ -81,7 +84,8 @@ class ToastState(val maxQueueSize: Int = DEFAULT_MAX_QUEUE_SIZE) {
         shape: Shape = RoundedCornerShape(size = 12.dp),
         iconSize: Dp = DefaultIconSize,
         actionLabel: String = "",
-        onAction: (() -> Unit)? = null
+        onAction: (() -> Unit)? = null,
+        onDismiss: (() -> Unit)? = null
     ) {
         val toast = ToastData(
             message = message,
@@ -97,7 +101,8 @@ class ToastState(val maxQueueSize: Int = DEFAULT_MAX_QUEUE_SIZE) {
             customShape = shape,
             customIconSize = iconSize,
             actionLabel = actionLabel,
-            onAction = onAction
+            onAction = onAction,
+            onDismiss = onDismiss
         )
         if (isVisible()) {
             if (queue.size < maxQueueSize) {
@@ -117,10 +122,12 @@ class ToastState(val maxQueueSize: Int = DEFAULT_MAX_QUEUE_SIZE) {
      */
     fun dismiss() {
         if (!isVisible()) return
+        val onDismiss = currentToast.onDismiss
         currentToast = currentToast.copy(message = "")
         scope.launch {
             delay(timeMillis = ExitAnimationDurationMs)
             reset()
+            onDismiss?.invoke()
         }
     }
 

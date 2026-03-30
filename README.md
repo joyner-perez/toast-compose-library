@@ -119,8 +119,31 @@ dependencies {
 // 1. Create the state — survives recomposition and configuration changes
 val toastState = rememberToastState()
 
-// 2. Show a toast anywhere in your screen logic
+// 2. Show a toast from a button click or any event handler
 toastState.show("Operation successful", ToastType.SUCCESS)
+```
+
+### Reacting to UI state (ViewModel errors, etc.)
+
+Never call `show()` directly in the composable body — it runs on every recomposition.
+Use `LaunchedEffect` so the toast fires only when the value actually changes:
+
+```kotlin
+// ❌ Runs on every recomposition while error is non-blank
+if (uiState.error.isNotBlank()) {
+    toastState.show(uiState.error, ToastType.ERROR)
+}
+
+// ✅ Fires only when uiState.error changes
+LaunchedEffect(uiState.error) {
+    if (uiState.error.isNotBlank()) {
+        toastState.show(
+            message = uiState.error,
+            type = ToastType.ERROR,
+            onDismiss = { viewModel.clearError() }
+        )
+    }
+}
 ```
 
 ---
