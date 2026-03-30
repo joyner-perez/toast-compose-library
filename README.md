@@ -61,7 +61,7 @@ A lightweight, fully customizable toast notification library for **Compose Multi
 
 ```toml
 [versions]
-toastCompose = "0.0.1"
+toastCompose = "latest version"
 
 [libraries]
 toast-compose = { module = "io.github.joyner-perez:toastcompose", version.ref = "toastCompose" }
