@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.vanniktechPublish) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.ktlint) apply false
+    alias(libs.plugins.caupain.version.plugin)
 }
 
 val ktLintVersion: String = libs.versions.ktlintVersion.get()
