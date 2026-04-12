@@ -17,11 +17,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.joyner.toastcomposelibrary.toast.ShowToast
 import com.joyner.toastcomposelibrary.toast.ToastHost
 import com.joyner.toastcomposelibrary.toast.ToastIcon
 import com.joyner.toastcomposelibrary.toast.ToastNative
@@ -122,6 +127,10 @@ private fun SampleContent(
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
         QueueToastSection(toastState = toastState)
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+        ShowEffectSection(toastState = toastState)
     }
 }
 
@@ -198,4 +207,40 @@ private fun QueueToastSection(toastState: ToastState) {
             toastState.show("Third toast in queue", ToastType.WARNING)
         }
     ) { Text("Show 3 in queue") }
+}
+
+@Composable
+private fun ShowEffectSection(toastState: ToastState) {
+    Text(text = "showEffect Demo", style = MaterialTheme.typography.headlineSmall)
+
+    var loginSuccess by remember { mutableStateOf(false) }
+    var uploadError by remember { mutableStateOf(false) }
+
+    // React to loginSuccess without LaunchedEffect
+    toastState.ShowToast(
+        condition = loginSuccess,
+        message = "Login successful!",
+        type = ToastType.SUCCESS,
+        onDismiss = { loginSuccess = false }
+    )
+
+    // React to uploadError without LaunchedEffect
+    toastState.ShowToast(
+        condition = uploadError,
+        message = "Upload failed. Try again.",
+        type = ToastType.ERROR,
+        onDismiss = { uploadError = false }
+    )
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorSuccess),
+        onClick = { loginSuccess = true }
+    ) { Text("Simulate Login Success") }
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorError),
+        onClick = { uploadError = true }
+    ) { Text("Simulate Upload Error") }
 }

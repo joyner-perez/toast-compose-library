@@ -18,6 +18,7 @@ A lightweight, fully customizable toast notification library for **Compose Multi
 - ✅ Custom enter / exit animations
 - ✅ Native platform toasts (Android `Toast`, iOS `UIAlertController`)
 - ✅ Fully customizable: icon, color, font, shape, size
+- ✅ `ShowToast` composable — react to state changes without `LaunchedEffect`
 
 ---
 
@@ -36,9 +37,10 @@ A lightweight, fully customizable toast notification library for **Compose Multi
 11. [Swipe to Dismiss](#swipe-to-dismiss)
 12. [Custom Animations](#custom-animations)
 13. [Native Platform Toast](#native-platform-toast)
-14. [Dismiss All](#dismiss-all)
-15. [API Reference](#api-reference)
-16. [License](#license)
+14. [Reacting to UI State](#reacting-to-ui-state)
+15. [Dismiss All](#dismiss-all)
+16. [API Reference](#api-reference)
+17. [License](#license)
 
 ---
 
@@ -125,8 +127,7 @@ toastState.show("Operation successful", ToastType.SUCCESS)
 
 ### Reacting to UI state (ViewModel errors, etc.)
 
-Never call `show()` directly in the composable body — it runs on every recomposition.
-Use `LaunchedEffect` so the toast fires only when the value actually changes:
+Use `ShowToast` to react to state changes without writing a `LaunchedEffect`:
 
 ```kotlin
 // ❌ Runs on every recomposition while error is non-blank
@@ -134,7 +135,15 @@ if (uiState.error.isNotBlank()) {
     toastState.show(uiState.error, ToastType.ERROR)
 }
 
-// ✅ Fires only when uiState.error changes
+// ✅ With ShowToast — no LaunchedEffect needed
+toastState.ShowToast(
+    condition = uiState.error.isNotBlank(),
+    message = uiState.error,
+    type = ToastType.ERROR,
+    onDismiss = { viewModel.clearError() }
+)
+
+// ✅ With LaunchedEffect — equivalent manual approach
 LaunchedEffect(uiState.error) {
     if (uiState.error.isNotBlank()) {
         toastState.show(
@@ -406,6 +415,42 @@ fun MyScreen() {
 
 ---
 
+## Reacting to UI State
+
+`ShowToast` is a composable extension on `ToastState` that wraps `LaunchedEffect` internally. It fires the toast whenever `condition` changes to `true`, and resets automatically via `onDismiss`.
+
+```kotlin
+@Composable
+fun LoginScreen(viewModel: LoginViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
+    val toastState = rememberToastState()
+
+    // Fires when isLoginSuccess becomes true — no LaunchedEffect boilerplate
+    toastState.ShowToast(
+        condition = uiState.isLoginSuccess,
+        message = "Welcome back!",
+        type = ToastType.SUCCESS,
+        onDismiss = {
+            viewModel.clearSuccess()
+            navController.navigate(Route.Home)
+        }
+    )
+
+    toastState.ShowToast(
+        condition = uiState.error.isNotBlank(),
+        message = uiState.error,
+        type = ToastType.ERROR,
+        onDismiss = { viewModel.clearError() }
+    )
+
+    Scaffold(snackbarHost = { ToastHost(toastState = toastState) }) { ... }
+}
+```
+
+`condition` acts as both the `LaunchedEffect` key and the guard — the toast shows only when it is `true` at the moment the effect fires.
+
+---
+
 ## Dismiss All
 
 Clear the current toast and drain the entire queue — useful when navigating away from a screen:
@@ -447,6 +492,32 @@ fun show(
     iconSize       : Dp             = 28.dp,
     actionLabel    : String         = "",
     onAction       : (() -> Unit)?  = null
+)
+```
+
+### `ToastState.ShowToast`
+
+Composable effect that shows a toast whenever `condition` changes to `true`. No `LaunchedEffect` required.
+
+```kotlin
+@Composable
+fun ToastState.ShowToast(
+    condition      : Boolean        = true,
+    message        : String,
+    type           : ToastType      = ToastType.INFO,
+    durationMillis : Long           = 2500L,
+    icon           : ToastIcon      = ToastIcon.Vector(type.icon),
+    backgroundColor: Color          = type.backgroundColor,
+    textColor      : Color          = Color.White,
+    fontFamily     : FontFamily     = FontFamily.Default,
+    fontSize       : TextUnit       = TextUnit.Unspecified,
+    iconTint       : Color          = Color.White,
+    fontWeight     : FontWeight     = FontWeight.Medium,
+    shape          : Shape          = RoundedCornerShape(12.dp),
+    iconSize       : Dp             = 28.dp,
+    actionLabel    : String         = "",
+    onAction       : (() -> Unit)?  = null,
+    onDismiss      : (() -> Unit)?  = null
 )
 ```
 

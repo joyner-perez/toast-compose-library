@@ -94,7 +94,7 @@ import kotlin.time.Clock
  * @param exit Transition used when the toast is dismissed. Defaults to slide-down + fade-out.
  */
 @Composable
-fun ToastCompose(
+internal fun ToastCompose(
     toastState: ToastState,
     modifier: Modifier = Modifier,
     showProgressBar: Boolean = false,
