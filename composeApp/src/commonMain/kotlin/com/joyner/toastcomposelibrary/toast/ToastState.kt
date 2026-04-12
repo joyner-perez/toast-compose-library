@@ -70,7 +70,7 @@ class ToastState(val maxQueueSize: Int = DEFAULT_MAX_QUEUE_SIZE) {
      * exit animation completes). Useful for triggering follow-up logic that should run only after
      * the toast is no longer visible. When `null` no callback is fired.
      */
-    fun show(
+    internal fun show(
         message: String,
         type: ToastType = ToastType.INFO,
         durationMillis: Long = 2500L,

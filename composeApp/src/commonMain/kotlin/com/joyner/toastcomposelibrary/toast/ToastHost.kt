@@ -40,7 +40,7 @@ fun ToastHost(
     enter: EnterTransition = slideInVertically(initialOffsetY = { it }) + fadeIn(),
     exit: ExitTransition = slideOutVertically(targetOffsetY = { it }) + fadeOut()
 ) {
-    ToastCompose(
+    ToastRenderer(
         toastState = toastState,
         modifier = modifier
             .fillMaxWidth()

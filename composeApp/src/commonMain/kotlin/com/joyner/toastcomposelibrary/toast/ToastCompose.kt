@@ -1,292 +1,91 @@
 package com.joyner.toastcomposelibrary.toast
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
-import toastcomposelibrary.composeapp.generated.resources.Res
-import toastcomposelibrary.composeapp.generated.resources.toast_undo_label
-import kotlin.time.Clock
 
 /**
- * Standalone toast composable managed by [toastState].
+ * State-driven composable that displays a toast whenever [condition] becomes `true`.
+ * Wraps [LaunchedEffect] internally — no boilerplate needed at the call site.
  *
- * Visibility is handled internally: the toast appears when [ToastState.show] is called,
- * auto-dismisses after [ToastData.durationMillis], and can also be dismissed by tapping it
- * or swiping it horizontally.
- *
- * **Option 1 — without Scaffold**, place it inside a [Box] and align it manually:
  * ```kotlin
- * val toastState = rememberToastState()
+ * var showToast by remember { mutableStateOf(false) }
  *
- * Box(modifier = Modifier.fillMaxSize()) {
- *     MyScreenContent(
- *         onSuccess = { toastState.show("Saved", ToastType.SUCCESS) }
- *     )
- *     ToastCompose(
- *         toastState = toastState,
- *         modifier = Modifier
- *             .align(Alignment.BottomCenter)
- *             .navigationBarsPadding()
- *             .padding(horizontal = 16.dp, vertical = 24.dp)
- *     )
- * }
+ * ToastCompose(
+ *     toastState = toastState,
+ *     condition = showToast,
+ *     message = "Done!",
+ *     type = ToastType.SUCCESS,
+ *     onDismiss = { showToast = false }
+ * )
+ *
+ * Button(onClick = { showToast = true }) { Text("Save") }
  * ```
  *
- * **Option 2 — with Scaffold**, use [ToastHost] in the `snackbarHost` slot:
- * ```kotlin
- * Scaffold(
- *     snackbarHost = { ToastHost(toastState = toastState) }
- * ) { innerPadding ->
- *     MyScreenContent(modifier = Modifier.padding(innerPadding))
- * }
- * ```
- *
- * @param toastState State that controls what message is shown and when to dismiss.
- * Use [rememberToastState] to create and remember an instance.
- * @param modifier Optional [Modifier] to control size and position of the toast.
- * @param showProgressBar When `true`, a thin progress bar is shown at the bottom of the toast
- * indicating the remaining display time.
- * @param enter Transition used when the toast becomes visible. Defaults to slide-up + fade-in.
- * @param exit Transition used when the toast is dismissed. Defaults to slide-down + fade-out.
+ * @param toastState State holder that controls toast visibility. Use [rememberToastState] to create one.
+ * @param condition When `true` at the moment the effect fires, the toast is shown.
+ * Defaults to `true` so you can pass a single truthy key and skip the redundant condition.
+ * @param message Text to display inside the toast.
+ * @param type Semantic type controlling the default icon and background color.
+ * @param durationMillis How long (ms) the toast stays visible before auto-dismissing.
+ * @param icon Icon shown on the leading side.
+ * @param backgroundColor Fill color of the toast surface.
+ * @param textColor Color of the message text.
+ * @param fontFamily Typeface used for the message text.
+ * @param fontSize Size of the message text. Pass [TextUnit.Unspecified] to use the default.
+ * @param iconTint Tint applied to the icon.
+ * @param fontWeight Weight of the message text.
+ * @param shape Shape of the toast container.
+ * @param iconSize Size of the icon container.
+ * @param actionLabel Label for the optional action button.
+ * @param onAction Callback invoked when the user taps the action button. `null` hides the button.
+ * @param onDismiss Callback invoked once the toast has fully disappeared.
  */
 @Composable
-internal fun ToastCompose(
+fun ToastCompose(
     toastState: ToastState,
-    modifier: Modifier = Modifier,
-    showProgressBar: Boolean = false,
-    enter: EnterTransition = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-    exit: ExitTransition = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+    condition: Boolean = true,
+    message: String,
+    type: ToastType = ToastType.INFO,
+    durationMillis: Long = 2500L,
+    icon: ToastIcon = ToastIcon.Vector(imageVector = type.icon),
+    backgroundColor: Color = type.backgroundColor,
+    textColor: Color = Color.White,
+    fontFamily: FontFamily = FontFamily.Default,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    iconTint: Color = Color.White,
+    fontWeight: FontWeight = FontWeight.Medium,
+    shape: Shape = RoundedCornerShape(size = 12.dp),
+    iconSize: Dp = DefaultIconSize,
+    actionLabel: String = "",
+    onAction: (() -> Unit)? = null,
+    onDismiss: (() -> Unit)? = null
 ) {
-    val toast = toastState.currentToast
-
-    // Epoch ms when the current toast started; 0 means not yet started.
-    // Survives configuration changes (rotation) so the progress bar can resume.
-    var toastStartTime by rememberSaveable { mutableLongStateOf(value = 0L) }
-
-    // Initialize Animatable from the remaining fraction when resuming after rotation.
-    val progress = remember(toast.message) {
-        val elapsed = if (toastStartTime > 0L && toast.message.isNotBlank()) {
-            Clock.System.now().toEpochMilliseconds() - toastStartTime
-        } else {
-            0L
-        }
-        val initialFraction = if (toast.durationMillis > 0L) {
-            1f - (elapsed.toFloat() / toast.durationMillis.toFloat()).coerceIn(0f, 1f)
-        } else {
-            1f
-        }
-        Animatable(initialValue = initialFraction)
-    }
-
-    ToastAnimatedContent(
-        toast = toast,
-        toastState = toastState,
-        modifier = modifier,
-        showProgressBar = showProgressBar,
-        enter = enter,
-        exit = exit,
-        progress = { progress.value }
-    )
-
-    LaunchedEffect(toast.message) {
-        if (toast.message.isNotBlank()) {
-            val now = Clock.System.now().toEpochMilliseconds()
-            // Only record start time the first time (not when resuming after rotation)
-            if (toastStartTime == 0L) {
-                toastStartTime = now
-                progress.snapTo(targetValue = 1f)
-            }
-            val remainingMs = (toast.durationMillis - (now - toastStartTime)).coerceAtLeast(0L)
-            launch {
-                progress.animateTo(
-                    targetValue = 0f,
-                    animationSpec = tween(
-                        durationMillis = remainingMs.toInt(),
-                        easing = LinearEasing
-                    )
-                )
-            }
-            delay(timeMillis = remainingMs)
-            toastState.dismiss()
-        } else {
-            toastStartTime = 0L // reset for the next toast
-        }
-    }
-}
-
-@Composable
-private fun ToastAnimatedContent(
-    toast: ToastData,
-    toastState: ToastState,
-    modifier: Modifier,
-    showProgressBar: Boolean,
-    enter: EnterTransition,
-    exit: ExitTransition,
-    progress: () -> Float
-) {
-    AnimatedVisibility(
-        visible = toastState.isVisible(),
-        enter = enter,
-        exit = exit,
-        modifier = modifier
-    ) {
-        key(toast.message) {
-            val dismissState = rememberSwipeToDismissBoxState()
-            LaunchedEffect(dismissState.currentValue) {
-                if (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
-                    toastState.dismiss()
-                }
-            }
-            SwipeToDismissBox(
-                state = dismissState,
-                backgroundContent = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(toast.customShape)
-                            .background(toast.customBackgroundColor)
-                    )
-                }
-            ) {
-                ToastItem(
-                    toast = toast,
-                    onDismiss = toastState::dismiss,
-                    showProgressBar = showProgressBar,
-                    progress = progress
-                )
-            }
-        }
-    }
-}
-
-@Composable
-internal fun ToastItemIcon(toast: ToastData) {
-    Box(
-        modifier = Modifier
-            .size(toast.customIconSize)
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.25f)),
-        contentAlignment = Alignment.Center
-    ) {
-        when (val icon = toast.customIcon) {
-            is ToastIcon.Vector -> Icon(
-                imageVector = icon.imageVector,
-                contentDescription = null,
-                tint = toast.customIconTint
-            )
-
-            is ToastIcon.Resource -> Icon(
-                painter = icon.painter,
-                contentDescription = null,
-                tint = toast.customIconTint
-            )
-        }
-    }
-}
-
-@Composable
-internal fun ToastItem(
-    toast: ToastData,
-    onDismiss: () -> Unit,
-    showProgressBar: Boolean,
-    progress: () -> Float
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(shape = toast.customShape)
-            .background(toast.customBackgroundColor)
-            .clickable(onClick = onDismiss)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ToastItemIcon(toast = toast)
-
-            Text(
-                text = toast.message,
-                color = toast.customTextColor,
-                fontSize = if (toast.customFontSize == TextUnit.Unspecified) {
-                    15.sp
-                } else {
-                    toast.customFontSize
-                },
-                fontWeight = toast.customFontWeight,
-                fontFamily = toast.customFontFamily,
-                modifier = Modifier.weight(1f)
-            )
-
-            if (toast.onAction != null) {
-                Text(
-                    text = toast.actionLabel.ifBlank {
-                        stringResource(Res.string.toast_undo_label)
-                    },
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(start = 4.dp)
-                        .clickable {
-                            toast.onAction.invoke()
-                            onDismiss()
-                        }
-                )
-            }
-        }
-
-        if (showProgressBar) {
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp),
-                color = Color.White.copy(alpha = 0.7f),
-                trackColor = Color.White.copy(alpha = 0.2f)
+    LaunchedEffect(condition) {
+        if (condition) {
+            toastState.show(
+                message = message,
+                type = type,
+                durationMillis = durationMillis,
+                icon = icon,
+                backgroundColor = backgroundColor,
+                textColor = textColor,
+                fontFamily = fontFamily,
+                fontSize = fontSize,
+                iconTint = iconTint,
+                fontWeight = fontWeight,
+                shape = shape,
+                iconSize = iconSize,
+                actionLabel = actionLabel,
+                onAction = onAction,
+                onDismiss = onDismiss
             )
         }
     }

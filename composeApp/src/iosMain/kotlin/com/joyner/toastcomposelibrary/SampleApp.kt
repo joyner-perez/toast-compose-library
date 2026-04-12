@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.joyner.toastcomposelibrary.toast.ShowToast
+import com.joyner.toastcomposelibrary.toast.ToastCompose
 import com.joyner.toastcomposelibrary.toast.ToastHost
 import com.joyner.toastcomposelibrary.toast.ToastIcon
 import com.joyner.toastcomposelibrary.toast.ToastNative
@@ -52,7 +52,6 @@ internal fun SampleApp() {
     MaterialTheme {
         val toastState = rememberToastState()
         val nativeToast = rememberToastNative()
-
         Scaffold(
             snackbarHost = { ToastHost(toastState = toastState) }
         ) { innerPadding ->
@@ -81,163 +80,223 @@ private fun SampleContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(text = "ToastCompose Demo", style = MaterialTheme.typography.headlineSmall)
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorSuccess),
-            onClick = { toastState.show("Operation successful", ToastType.SUCCESS) }
-        ) { Text("Show SUCCESS") }
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorError),
-            onClick = { toastState.show("An error occurred", ToastType.ERROR) }
-        ) { Text("Show ERROR") }
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorInfo),
-            onClick = { toastState.show("Important information", ToastType.INFO) }
-        ) { Text("Show INFO") }
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = ColorWarning),
-            onClick = { toastState.show("Attention required", ToastType.WARNING) }
-        ) { Text("Show WARNING") }
+        BasicToastSection(toastState = toastState)
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
         Text(text = "Native Toast Demo", style = MaterialTheme.typography.headlineSmall)
-
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = { nativeToast.show("Short native toast") }
         ) { Text("Show Native SHORT") }
-
         Button(
             modifier = Modifier.fillMaxWidth(),
             onClick = { nativeToast.show("Long native toast", ToastNativeDuration.LONG) }
         ) { Text("Show Native LONG") }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
         CustomToastSection(toastState = toastState)
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
         QueueToastSection(toastState = toastState)
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-
         ShowEffectSection(toastState = toastState)
     }
 }
 
 @Composable
+private fun BasicToastSection(toastState: ToastState) {
+    var showSuccess by remember { mutableStateOf(false) }
+    var showError by remember { mutableStateOf(false) }
+    var showInfo by remember { mutableStateOf(false) }
+    var showWarning by remember { mutableStateOf(false) }
+
+    ToastCompose(
+        toastState = toastState,
+        condition = showSuccess,
+        message = "Operation successful",
+        type = ToastType.SUCCESS,
+        onDismiss = { showSuccess = false }
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showError,
+        message = "An error occurred",
+        type = ToastType.ERROR,
+        onDismiss = { showError = false }
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showInfo,
+        message = "Important information",
+        type = ToastType.INFO,
+        onDismiss = { showInfo = false }
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showWarning,
+        message = "Attention required",
+        type = ToastType.WARNING,
+        onDismiss = { showWarning = false }
+    )
+
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorSuccess),
+        onClick = { showSuccess = true }
+    ) { Text("Show SUCCESS") }
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorError),
+        onClick = { showError = true }
+    ) { Text("Show ERROR") }
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorInfo),
+        onClick = { showInfo = true }
+    ) { Text("Show INFO") }
+    Button(
+        modifier = Modifier.fillMaxWidth(),
+        colors = ButtonDefaults.buttonColors(containerColor = ColorWarning),
+        onClick = { showWarning = true }
+    ) { Text("Show WARNING") }
+}
+
+@Composable
 private fun CustomToastSection(toastState: ToastState) {
     val composePainter = painterResource(Res.drawable.compose_multiplatform)
+    var showCustomVector by remember { mutableStateOf(false) }
+    var showCustomDrawable by remember { mutableStateOf(false) }
+
+    ToastCompose(
+        toastState = toastState,
+        condition = showCustomVector,
+        message = "Custom icon, color and font",
+        icon = ToastIcon.Vector(Icons.Filled.Star),
+        backgroundColor = ColorCustom,
+        textColor = ColorTeal,
+        fontFamily = FontFamily.Cursive,
+        onDismiss = { showCustomVector = false }
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showCustomDrawable,
+        message = "Toast with drawable icon",
+        icon = ToastIcon.Resource(composePainter),
+        backgroundColor = ColorTeal,
+        onDismiss = { showCustomDrawable = false }
+    )
 
     Text(text = "Custom Toast Demo", style = MaterialTheme.typography.headlineSmall)
-
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = ColorCustom),
-        onClick = {
-            toastState.show(
-                message = "Custom icon, color and font",
-                icon = ToastIcon.Vector(Icons.Filled.Star),
-                backgroundColor = ColorCustom,
-                textColor = ColorTeal,
-                fontFamily = FontFamily.Cursive
-            )
-        }
+        onClick = { showCustomVector = true }
     ) { Text("Show Custom Vector") }
-
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = ColorTeal),
-        onClick = {
-            toastState.show(
-                message = "Toast with drawable icon",
-                icon = ToastIcon.Resource(composePainter),
-                backgroundColor = ColorTeal
-            )
-        }
+        onClick = { showCustomDrawable = true }
     ) { Text("Show Custom Drawable") }
+
+    ActionToastSection(toastState = toastState)
+}
+
+@Composable
+private fun ActionToastSection(toastState: ToastState) {
+    var showActionUndo by remember { mutableStateOf(false) }
+    var showActionView by remember { mutableStateOf(false) }
+
+    ToastCompose(
+        toastState = toastState,
+        condition = showActionUndo,
+        message = "Item deleted",
+        type = ToastType.ERROR,
+        onAction = {},
+        onDismiss = {
+            showActionUndo = false
+            println("ToastCompose: Toast dismissed: item deleted")
+        }
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showActionView,
+        message = "File saved",
+        type = ToastType.SUCCESS,
+        actionLabel = "View",
+        onAction = {},
+        onDismiss = { showActionView = false }
+    )
 
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = ColorError),
-        onClick = {
-            toastState.show(
-                message = "Item deleted",
-                type = ToastType.ERROR,
-                onAction = {},
-                onDismiss = {
-                    println("ToastCompose: Toast dismissed: item deleted")
-                }
-            )
-        }
+        onClick = { showActionUndo = true }
     ) { Text("Action: Undo (default)") }
-
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = ColorInfo),
-        onClick = {
-            toastState.show(
-                message = "File saved",
-                type = ToastType.SUCCESS,
-                actionLabel = "View",
-                onAction = {}
-            )
-        }
+        onClick = { showActionView = true }
     ) { Text("Action: View (custom)") }
 }
 
 @Composable
 private fun QueueToastSection(toastState: ToastState) {
-    Text(text = "Queue Demo", style = MaterialTheme.typography.headlineSmall)
+    var showQueue by remember { mutableStateOf(false) }
 
+    ToastCompose(
+        toastState = toastState,
+        condition = showQueue,
+        message = "First toast in queue",
+        type = ToastType.SUCCESS,
+        onDismiss = { showQueue = false }
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showQueue,
+        message = "Second toast in queue",
+        type = ToastType.INFO
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showQueue,
+        message = "Third toast in queue",
+        type = ToastType.WARNING
+    )
+
+    Text(text = "Queue Demo", style = MaterialTheme.typography.headlineSmall)
     Button(
         modifier = Modifier.fillMaxWidth(),
-        onClick = {
-            toastState.show("First toast in queue", ToastType.SUCCESS)
-            toastState.show("Second toast in queue", ToastType.INFO)
-            toastState.show("Third toast in queue", ToastType.WARNING)
-        }
+        onClick = { showQueue = true }
     ) { Text("Show 3 in queue") }
 }
 
 @Composable
 private fun ShowEffectSection(toastState: ToastState) {
-    Text(text = "showEffect Demo", style = MaterialTheme.typography.headlineSmall)
-
     var loginSuccess by remember { mutableStateOf(false) }
     var uploadError by remember { mutableStateOf(false) }
 
-    // React to loginSuccess without LaunchedEffect
-    toastState.ShowToast(
+    ToastCompose(
+        toastState = toastState,
         condition = loginSuccess,
         message = "Login successful!",
         type = ToastType.SUCCESS,
         onDismiss = { loginSuccess = false }
     )
-
-    // React to uploadError without LaunchedEffect
-    toastState.ShowToast(
+    ToastCompose(
+        toastState = toastState,
         condition = uploadError,
         message = "Upload failed. Try again.",
         type = ToastType.ERROR,
         onDismiss = { uploadError = false }
     )
 
+    Text(text = "ShowToast Demo", style = MaterialTheme.typography.headlineSmall)
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = ColorSuccess),
         onClick = { loginSuccess = true }
     ) { Text("Simulate Login Success") }
-
     Button(
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(containerColor = ColorError),

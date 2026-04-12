@@ -18,7 +18,7 @@ A lightweight, fully customizable toast notification library for **Compose Multi
 - ✅ Custom enter / exit animations
 - ✅ Native platform toasts (Android `Toast`, iOS `UIAlertController`)
 - ✅ Fully customizable: icon, color, font, shape, size
-- ✅ `ShowToast` composable — react to state changes without `LaunchedEffect`
+- ✅ `ToastCompose` composable — single, state-driven API to display toasts
 
 ---
 
@@ -98,7 +98,7 @@ dependencies {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.joyner-perez:toastcompose:0.0.1")
+            implementation("io.github.joyner-perez:toastcompose:<latest-version>") // see badge above
         }
     }
 }
@@ -107,7 +107,7 @@ kotlin {
 *Android-only project — module `build.gradle.kts`:*
 ```kotlin
 dependencies {
-    implementation("io.github.joyner-perez:toastcompose:0.0.1")
+    implementation("io.github.joyner-perez:toastcompose:<latest-version>") // see badge above
 }
 ```
 
@@ -117,41 +117,25 @@ dependencies {
 
 ## Quick Start
 
+`ToastCompose` is the only way to display a toast. Declare it in your composable, bind it to a state variable, and set that variable to `true` to trigger it.
+
 ```kotlin
-// 1. Create the state — survives recomposition and configuration changes
 val toastState = rememberToastState()
 
-// 2. Show a toast from a button click or any event handler
-toastState.show("Operation successful", ToastType.SUCCESS)
-```
+var showToast by remember { mutableStateOf(false) }
 
-### Reacting to UI state (ViewModel errors, etc.)
-
-Use `ShowToast` to react to state changes without writing a `LaunchedEffect`:
-
-```kotlin
-// ❌ Runs on every recomposition while error is non-blank
-if (uiState.error.isNotBlank()) {
-    toastState.show(uiState.error, ToastType.ERROR)
-}
-
-// ✅ With ShowToast — no LaunchedEffect needed
-toastState.ShowToast(
-    condition = uiState.error.isNotBlank(),
-    message = uiState.error,
-    type = ToastType.ERROR,
-    onDismiss = { viewModel.clearError() }
+// 1. Declare the toast — fires whenever showToast becomes true
+ToastCompose(
+    toastState = toastState,
+    condition = showToast,
+    message = "Operation successful",
+    type = ToastType.SUCCESS,
+    onDismiss = { showToast = false }
 )
 
-// ✅ With LaunchedEffect — equivalent manual approach
-LaunchedEffect(uiState.error) {
-    if (uiState.error.isNotBlank()) {
-        toastState.show(
-            message = uiState.error,
-            type = ToastType.ERROR,
-            onDismiss = { viewModel.clearError() }
-        )
-    }
+// 2. Trigger it from any event
+Button(onClick = { showToast = true }) {
+    Text("Save")
 }
 ```
 
@@ -166,26 +150,30 @@ Pass `ToastHost` to the `snackbarHost` slot of `Scaffold`. It handles positionin
 fun MyScreen() {
     val toastState = rememberToastState()
 
+    var showSuccess by remember { mutableStateOf(false) }
+    var showError   by remember { mutableStateOf(false) }
+
+    ToastCompose(
+        toastState = toastState,
+        condition = showSuccess,
+        message = "Operation successful",
+        type = ToastType.SUCCESS,
+        onDismiss = { showSuccess = false }
+    )
+    ToastCompose(
+        toastState = toastState,
+        condition = showError,
+        message = "An error occurred",
+        type = ToastType.ERROR,
+        onDismiss = { showError = false }
+    )
+
     Scaffold(
         snackbarHost = { ToastHost(toastState = toastState) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-
-            Button(onClick = {
-                toastState.show("Operation successful", ToastType.SUCCESS)
-            }) { Text("Show SUCCESS") }
-
-            Button(onClick = {
-                toastState.show("An error occurred", ToastType.ERROR)
-            }) { Text("Show ERROR") }
-
-            Button(onClick = {
-                toastState.show("Important information", ToastType.INFO)
-            }) { Text("Show INFO") }
-
-            Button(onClick = {
-                toastState.show("Attention required", ToastType.WARNING)
-            }) { Text("Show WARNING") }
+            Button(onClick = { showSuccess = true }) { Text("Show SUCCESS") }
+            Button(onClick = { showError = true })   { Text("Show ERROR") }
         }
     }
 }
@@ -195,27 +183,34 @@ fun MyScreen() {
 
 ## Usage without Scaffold
 
-Place `ToastCompose` inside a `Box` and align it manually:
+Place `ToastHost` inside a `Box` and align it manually:
 
 ```kotlin
 @Composable
 fun MyScreen() {
     val toastState = rememberToastState()
 
+    var showToast by remember { mutableStateOf(false) }
+
+    ToastCompose(
+        toastState = toastState,
+        condition = showToast,
+        message = "File saved",
+        type = ToastType.SUCCESS,
+        onDismiss = { showToast = false }
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
-        // Your screen content
         Button(
             modifier = Modifier.align(Alignment.Center),
-            onClick = { toastState.show("File saved", ToastType.SUCCESS) }
+            onClick = { showToast = true }
         ) { Text("Save") }
 
-        // Toast overlay — pinned to the bottom center
-        ToastCompose(
+        ToastHost(
             toastState = toastState,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 24.dp)
         )
     }
 }
@@ -235,30 +230,42 @@ Four built-in types, each with a default icon and background color:
 | `ToastType.WARNING` | Orange `#E65100` | ⚠️ Warning |
 
 ```kotlin
-toastState.show("Operation successful", ToastType.SUCCESS)
-toastState.show("An error occurred",    ToastType.ERROR)
-toastState.show("Important information", ToastType.INFO)
-toastState.show("Attention required",   ToastType.WARNING)
+var showSuccess by remember { mutableStateOf(false) }
+var showError   by remember { mutableStateOf(false) }
+var showInfo    by remember { mutableStateOf(false) }
+var showWarning by remember { mutableStateOf(false) }
+
+ToastCompose(toastState = toastState, condition = showSuccess, message = "Operation successful", type = ToastType.SUCCESS, onDismiss = { showSuccess = false })
+ToastCompose(toastState = toastState, condition = showError,   message = "An error occurred",    type = ToastType.ERROR,   onDismiss = { showError = false })
+ToastCompose(toastState = toastState, condition = showInfo,    message = "Important information", type = ToastType.INFO,    onDismiss = { showInfo = false })
+ToastCompose(toastState = toastState, condition = showWarning, message = "Attention required",    type = ToastType.WARNING, onDismiss = { showWarning = false })
 ```
 
 ---
 
 ## Customization
 
-Every visual property can be overridden per toast call:
+Every visual property can be overridden per `ToastCompose` call:
 
 ```kotlin
+var showCustom by remember { mutableStateOf(false) }
+
 // Custom vector icon (Material Icons or your own ImageVector)
-toastState.show(
+ToastCompose(
+    toastState = toastState,
+    condition = showCustom,
     message = "Custom icon, color and font",
     icon = ToastIcon.Vector(Icons.Filled.Star),
     backgroundColor = Color(0xFF6A1B9A),
     textColor = Color(0xFF00695C),
-    fontFamily = FontFamily.Cursive
+    fontFamily = FontFamily.Cursive,
+    onDismiss = { showCustom = false }
 )
 ```
 
 ```kotlin
+var showDrawable by remember { mutableStateOf(false) }
+
 // Custom drawable / painter icon
 // Android-only project → use painterResource from androidx
 val painter = painterResource(R.drawable.ic_my_icon)
@@ -266,20 +273,25 @@ val painter = painterResource(R.drawable.ic_my_icon)
 // Compose Multiplatform → use painterResource from compose-resources
 val painter = painterResource(Res.drawable.ic_my_icon)
 
-toastState.show(
+ToastCompose(
+    toastState = toastState,
+    condition = showDrawable,
     message = "Toast with drawable icon",
     icon = ToastIcon.Resource(painter = painter),
-    backgroundColor = Color(0xFF00695C)
+    backgroundColor = Color(0xFF00695C),
+    onDismiss = { showDrawable = false }
 )
 ```
 
 ### All available parameters
 
 ```kotlin
-toastState.show(
+ToastCompose(
+    toastState      = toastState,
+    condition       = show,               // triggers the toast when true
     message         = "Hello",
-    type            = ToastType.INFO,        // controls default icon + color
-    durationMillis  = 3000L,                 // display time in ms (default 2500)
+    type            = ToastType.INFO,     // controls default icon + color
+    durationMillis  = 3000L,              // display time in ms (default 2500)
     icon            = ToastIcon.Vector(...), // or ToastIcon.Resource(painter)
     backgroundColor = Color.Blue,
     textColor       = Color.White,
@@ -289,8 +301,9 @@ toastState.show(
     iconTint        = Color.Yellow,
     iconSize        = 32.dp,
     shape           = RoundedCornerShape(8.dp),
-    actionLabel     = "Undo",                // optional action button label
-    onAction        = { /* on action tap */ }
+    actionLabel     = "Undo",             // optional action button label
+    onAction        = { /* on action tap */ },
+    onDismiss       = { show = false }
 )
 ```
 
@@ -301,19 +314,28 @@ toastState.show(
 Pass `onAction` to show a tappable action button on the trailing side. If `actionLabel` is blank, the locale-aware default **"Undo"** label is used (supports English, Spanish, French, Italian, Portuguese, German).
 
 ```kotlin
+var showUndo by remember { mutableStateOf(false) }
+var showView by remember { mutableStateOf(false) }
+
 // Default label "Undo" (locale-aware)
-toastState.show(
-    message  = "Item deleted",
-    type     = ToastType.ERROR,
-    onAction = { /* restore item */ }
+ToastCompose(
+    toastState = toastState,
+    condition = showUndo,
+    message = "Item deleted",
+    type = ToastType.ERROR,
+    onAction = { /* restore item */ },
+    onDismiss = { showUndo = false }
 )
 
 // Custom label
-toastState.show(
-    message     = "File saved",
-    type        = ToastType.SUCCESS,
+ToastCompose(
+    toastState = toastState,
+    condition = showView,
+    message = "File saved",
+    type = ToastType.SUCCESS,
     actionLabel = "View",
-    onAction    = { openFile() }
+    onAction = { openFile() },
+    onDismiss = { showView = false }
 )
 ```
 
@@ -321,7 +343,7 @@ toastState.show(
 
 ## Toast Queue
 
-If a toast is already visible when `show()` is called, the new toast is queued and shown automatically once the current one is dismissed. The queue is bounded — extra toasts beyond the limit are silently dropped.
+If a toast is already visible when `ToastCompose` fires, the new toast is queued and shown automatically once the current one is dismissed. The queue is bounded — extra toasts beyond the limit are silently dropped.
 
 ```kotlin
 // Default max queue size is 3
@@ -330,17 +352,19 @@ val toastState = rememberToastState()
 // Custom max queue size
 val toastState = rememberToastState(maxQueueSize = 5)
 
-// Enqueue multiple toasts at once
-toastState.show("First toast in queue",  ToastType.SUCCESS)
-toastState.show("Second toast in queue", ToastType.INFO)
-toastState.show("Third toast in queue",  ToastType.WARNING)
+// Trigger 3 toasts at once — they queue up automatically
+var showQueue by remember { mutableStateOf(false) }
+
+ToastCompose(toastState = toastState, condition = showQueue, message = "First toast in queue",  type = ToastType.SUCCESS, onDismiss = { showQueue = false })
+ToastCompose(toastState = toastState, condition = showQueue, message = "Second toast in queue", type = ToastType.INFO)
+ToastCompose(toastState = toastState, condition = showQueue, message = "Third toast in queue",  type = ToastType.WARNING)
 ```
 
 ---
 
 ## Progress Bar
 
-Show a thin animated bar at the bottom of the toast that depletes over `durationMillis`. Enable it once on `ToastHost` or `ToastCompose` and it applies to every toast.
+Show a thin animated bar at the bottom of the toast that depletes over `durationMillis`. Enable it once on `ToastHost` and it applies to every toast.
 
 ```kotlin
 // With Scaffold
@@ -354,7 +378,7 @@ Scaffold(
 ) { ... }
 
 // Without Scaffold
-ToastCompose(
+ToastHost(
     toastState = toastState,
     showProgressBar = true,
     modifier = Modifier.align(Alignment.BottomCenter)
@@ -417,7 +441,7 @@ fun MyScreen() {
 
 ## Reacting to UI State
 
-`ShowToast` is a composable extension on `ToastState` that wraps `LaunchedEffect` internally. It fires the toast whenever `condition` changes to `true`, and resets automatically via `onDismiss`.
+`ToastCompose` wraps `LaunchedEffect` internally — it fires the toast whenever `condition` changes to `true`, and resets automatically via `onDismiss`. This replaces the manual `LaunchedEffect` + state check pattern:
 
 ```kotlin
 @Composable
@@ -426,7 +450,8 @@ fun LoginScreen(viewModel: LoginViewModel) {
     val toastState = rememberToastState()
 
     // Fires when isLoginSuccess becomes true — no LaunchedEffect boilerplate
-    toastState.ShowToast(
+    ToastCompose(
+        toastState = toastState,
         condition = uiState.isLoginSuccess,
         message = "Welcome back!",
         type = ToastType.SUCCESS,
@@ -436,7 +461,8 @@ fun LoginScreen(viewModel: LoginViewModel) {
         }
     )
 
-    toastState.ShowToast(
+    ToastCompose(
+        toastState = toastState,
         condition = uiState.error.isNotBlank(),
         message = uiState.error,
         type = ToastType.ERROR,
@@ -474,34 +500,14 @@ toastState.dismissAll()
 fun rememberToastState(maxQueueSize: Int = 3): ToastState
 ```
 
-### `ToastState.show`
+### `ToastCompose`
 
-```kotlin
-fun show(
-    message        : String,
-    type           : ToastType      = ToastType.INFO,
-    durationMillis : Long           = 2500L,
-    icon           : ToastIcon      = ToastIcon.Vector(type.icon),
-    backgroundColor: Color          = type.backgroundColor,
-    textColor      : Color          = Color.White,
-    fontFamily     : FontFamily     = FontFamily.Default,
-    fontSize       : TextUnit       = TextUnit.Unspecified,
-    iconTint       : Color          = Color.White,
-    fontWeight     : FontWeight     = FontWeight.Medium,
-    shape          : Shape          = RoundedCornerShape(12.dp),
-    iconSize       : Dp             = 28.dp,
-    actionLabel    : String         = "",
-    onAction       : (() -> Unit)?  = null
-)
-```
-
-### `ToastState.ShowToast`
-
-Composable effect that shows a toast whenever `condition` changes to `true`. No `LaunchedEffect` required.
+Composable that shows a toast whenever `condition` changes to `true`. No `LaunchedEffect` required.
 
 ```kotlin
 @Composable
-fun ToastState.ShowToast(
+fun ToastCompose(
+    toastState     : ToastState,
     condition      : Boolean        = true,
     message        : String,
     type           : ToastType      = ToastType.INFO,
@@ -526,19 +532,6 @@ fun ToastState.ShowToast(
 ```kotlin
 @Composable
 fun ToastHost(
-    toastState     : ToastState,
-    modifier       : Modifier       = Modifier,
-    showProgressBar: Boolean        = false,
-    enter          : EnterTransition = slideInVertically(...) + fadeIn(),
-    exit           : ExitTransition  = slideOutVertically(...) + fadeOut()
-)
-```
-
-### `ToastCompose`
-
-```kotlin
-@Composable
-fun ToastCompose(
     toastState     : ToastState,
     modifier       : Modifier       = Modifier,
     showProgressBar: Boolean        = false,
