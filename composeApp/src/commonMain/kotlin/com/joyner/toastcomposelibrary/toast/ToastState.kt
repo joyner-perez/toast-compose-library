@@ -106,7 +106,7 @@ class ToastState(val maxQueueSize: Int = DEFAULT_MAX_QUEUE_SIZE) {
         )
         if (isVisible()) {
             if (queue.size < maxQueueSize) {
-                queue.addLast(toast)
+                queue.addLast(element = toast)
             }
         } else {
             currentToast = toast
