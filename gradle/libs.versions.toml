@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.0"
+agp = "9.2.1"
 vanniktechPublish = "0.36.0"
 detekt = "1.23.8"
 detekt-compose-rules = "0.5.8"
