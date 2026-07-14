@@ -14,15 +14,18 @@ val composeResourcesSource =
 
 val generatedAssetsDir = layout.buildDirectory.get().dir("generated/composeResources")
 
-val copyComposeResources by tasks.registering(Copy::class) {
-    dependsOn(":composeApp:prepareComposeResourcesTaskForCommonMain")
-    from(composeResourcesSource)
-    into(
-        generatedAssetsDir.dir(
-            "composeResources/toastcomposelibrary.composeapp.generated.resources"
+val copyComposeResources =
+    tasks.register<Copy>("copyComposeResources") {
+        group = "build"
+        description = "Copies Multiplatform resources from :composeApp into androidApp's assets."
+        dependsOn(":composeApp:prepareComposeResourcesTaskForCommonMain")
+        from(composeResourcesSource)
+        into(
+            generatedAssetsDir.dir(
+                "composeResources/toastcomposelibrary.composeapp.generated.resources"
+            )
         )
-    )
-}
+    }
 
 android {
     namespace = "com.joyner.toastcomposelibrary.app"
