@@ -81,7 +81,7 @@ mavenPublishing {
     coordinates(
         groupId = "io.github.joyner-perez",
         artifactId = "toastcompose",
-        version = "0.0.9"
+        version = "0.0.10"
     )
 
     publishToMavenCentral()
