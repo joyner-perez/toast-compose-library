@@ -127,7 +127,9 @@ val mavenCentralSecrets =
     ).associateWith { providers.gradleProperty(it) }
 
 gradle.taskGraph.whenReady {
-    val publishesToCentral = allTasks.any { it.name.startsWith("publish") && it.name.contains("MavenCentral") }
+    val publishesToCentral = allTasks.any {
+        it.name.startsWith("publish") && it.name.contains("MavenCentral")
+    }
     val missing = mavenCentralSecrets.filterValues { it.orNull.isNullOrBlank() }.keys
     if (publishesToCentral && missing.isNotEmpty()) {
         throw GradleException(
