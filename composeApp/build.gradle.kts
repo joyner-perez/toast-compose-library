@@ -115,3 +115,24 @@ mavenPublishing {
         }
     }
 }
+
+// Secrets live in ~/.gradle/gradle.properties, never in this repo. Fail before signing/uploading if any is missing.
+val mavenCentralSecrets =
+    listOf(
+        "mavenCentralUsername",
+        "mavenCentralPassword",
+        "signingInMemoryKey",
+        "signingInMemoryKeyId",
+        "signingInMemoryKeyPassword"
+    ).associateWith { providers.gradleProperty(it) }
+
+gradle.taskGraph.whenReady {
+    val publishesToCentral = allTasks.any { it.name.startsWith("publish") && it.name.contains("MavenCentral") }
+    val missing = mavenCentralSecrets.filterValues { it.orNull.isNullOrBlank() }.keys
+    if (publishesToCentral && missing.isNotEmpty()) {
+        throw GradleException(
+            "Missing Gradle properties for Maven Central: ${missing.joinToString()}. " +
+                "Add them to ~/.gradle/gradle.properties (see README > Publishing)."
+        )
+    }
+}

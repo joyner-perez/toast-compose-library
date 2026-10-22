@@ -40,7 +40,8 @@ A lightweight, fully customizable toast notification library for **Compose Multi
 14. [Reacting to UI State](#reacting-to-ui-state)
 15. [Dismiss All](#dismiss-all)
 16. [API Reference](#api-reference)
-17. [License](#license)
+17. [Publishing](#publishing)
+18. [License](#license)
 
 ---
 
@@ -555,6 +556,33 @@ sealed class ToastIcon {
 fun ToastNative.show(message: String)                                   // SHORT duration
 fun ToastNative.show(message: String, duration: ToastNativeDuration)    // SHORT or LONG
 ```
+
+---
+
+## Publishing
+
+Maintainers only. Credentials never live in this repository: the build reads them from `~/.gradle/gradle.properties`, which every Gradle daemon sees — terminal or Android Studio, however the IDE was launched.
+
+Required properties in `~/.gradle/gradle.properties`:
+
+```properties
+mavenCentralUsername=<Sonatype user token name>
+mavenCentralPassword=<Sonatype user token password>
+signingInMemoryKeyId=<last 8 hex chars of the GPG key id>
+signingInMemoryKeyPassword=<GPG key passphrase>
+signingInMemoryKey=<armored private key on one line, see below>
+```
+
+Export the private key as a single line (newlines escaped as `\n`) and lock the file down:
+
+```bash
+echo "signingInMemoryKey=$(gpg --armor --export-secret-keys <KEY_ID> | awk 'NR>1{printf "\\n"}{printf "%s",$0}')" >> ~/.gradle/gradle.properties
+chmod 600 ~/.gradle/gradle.properties
+```
+
+Publish from Android Studio: Gradle panel → `composeApp` → `Tasks` → `publishing` → `publishToMavenCentral` (or `./gradlew :composeApp:publishToMavenCentral`). Restart Android Studio (or `./gradlew --stop`) after editing the properties. If any property is missing the build fails before signing, naming the missing properties.
+
+`publishToMavenLocal` also signs (`signAllPublications()`), so it needs the signing properties too.
 
 ---
 
